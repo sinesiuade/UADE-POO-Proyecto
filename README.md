@@ -9,14 +9,19 @@ Proyecto base con separación de responsabilidades en tres capas: modelo (datos 
 
 ## Tecnologías
 
-- Java 17+
+- Java 25
+- Maven
 - Swing (`javax.swing`)
+- Gson (persistencia en archivos JSON)
+- SLF4J + Logback (logs)
+- Lombok
+- JUnit 5 (tests)
 
 ## Arquitectura MVC
 
 | Capa | Paquete | Responsabilidad |
 |------|---------|-----------------|
-| **Model** | `model` | Entidades, reglas de negocio y acceso a datos |
+| **Model** | `model` | Entidades, DTOs, repositorios y reglas de negocio |
 | **View** | `view` | Interfaz gráfica (`JFrame`, `JPanel`, `JDialog`) |
 | **Controller** | `controller` | Manejo de eventos y comunicación entre vista y modelo |
 
@@ -26,30 +31,59 @@ Proyecto base con separación de responsabilidades en tres capas: modelo (datos 
 src/main/java/com/tpo/
 ├── Main.java
 ├── model/
-│   ├── entities/
-│   ├── dto/
-│   └── services/
+│   ├── entities/      # Entidades del dominio
+│   ├── dto/           # Objetos de transferencia (vista ↔ servicio, JSON)
+│   ├── repositories/  # Acceso y persistencia de datos
+│   └── services/      # Lógica de negocio
 ├── view/
 │   ├── frames/
 │   ├── panels/
 │   └── dialogs/
 ├── controller/
 └── util/
+
+data/                    # Archivos JSON de persistencia
+src/main/resources/      # logback.xml y otros recursos
+src/test/java/           # Tests con JUnit 5
 ```
 
 ## Requisitos
 
 - JDK 25
+- Lombok 1.18.40+ (el proyecto usa 1.18.46)
+- Maven 3.9+
 - IDE compatible (IntelliJ IDEA, Eclipse, VS Code con extensión Java)
 
+## Dependencias (Maven)
+
+| Librería | Uso |
+|----------|-----|
+| **Gson** | Leer y escribir datos en archivos `.json` (carpeta `data/`) |
+| **SLF4J + Logback** | Registro de eventos y errores (`logs/app.log`) |
+| **Lombok** | Reducir código repetitivo en entidades (`@Getter`, `@Setter`, etc.) |
+| **JUnit 5** | Tests unitarios en `src/test/java` |
+
+## Persistencia (JSON)
+
+Los datos se guardan en archivos JSON dentro de la carpeta `data/` en la raíz del proyecto (no se usa base de datos).
+
 ## Cómo ejecutar
+
+### Con Maven (recomendado)
+
+```bash
+mvn compile
+mvn exec:java
+mvn test
+```
 
 ### Desde el IDE
 
 1. Clonar el repositorio.
-2. Abrir el proyecto en el IDE.
-3. Marcar `src/main/java` como **Sources Root** (IntelliJ: clic derecho → Mark Directory as → Sources Root).
-4. Ejecutar la clase `com.tpo.Main`.
+2. Abrir el proyecto como **proyecto Maven** (IntelliJ detecta el `pom.xml` automáticamente).
+3. Habilitar **annotation processing** para Lombok:  
+   Settings → Build → Compiler → Annotation Processors → Enable.
+4. Ejecutar la clase `com.tpo.Main` o usar la configuración Maven `exec:java`.
 
 ## Convenciones de código
 

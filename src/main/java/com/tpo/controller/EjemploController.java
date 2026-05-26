@@ -1,6 +1,6 @@
 package com.tpo.controller;
 
-import com.tpo.model.entities.Ejemplo;
+import com.tpo.model.dto.EjemploDTO;
 import com.tpo.model.services.EjemploService;
 import com.tpo.view.panels.EjemploPanel;
 
@@ -26,7 +26,7 @@ public class EjemploController {
     private void guardar() {
         try {
             String nombre = vista.getCampoNombre().getText();
-            Ejemplo creado = servicio.crear(nombre);
+            EjemploDTO creado = servicio.crear(nombre);
             vista.limpiarCampoNombre();
             vista.mostrarMensaje("Guardado correctamente: " + creado + "\n\n" + formatearListado());
         } catch (IllegalArgumentException ex) {
@@ -39,12 +39,12 @@ public class EjemploController {
     }
 
     private String formatearListado() {
-        List<Ejemplo> ejemplos = servicio.listarTodos();
+        List<EjemploDTO> ejemplos = servicio.listarTodos();
         if (ejemplos.isEmpty()) {
             return "No hay registros.";
         }
         return ejemplos.stream()
-                .map(Ejemplo::toString)
+                .map(EjemploDTO::toString)
                 .collect(Collectors.joining("\n"));
     }
 }
