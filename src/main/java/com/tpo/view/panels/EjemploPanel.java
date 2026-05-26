@@ -1,5 +1,8 @@
 package com.tpo.view.panels;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -9,11 +12,13 @@ import javax.swing.JTextField;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 
+@Getter
+@Setter
 public class EjemploPanel extends JPanel {
 
-    private final JTextField campoNombre;
-    private final JButton btnGuardar;
-    private final JTextArea areaResultado;
+    private JTextField campoNombre;
+    private JButton btnGuardar;
+    private JTextArea areaResultado;
 
     public EjemploPanel() {
         setLayout(new BorderLayout(8, 8));
@@ -30,14 +35,6 @@ public class EjemploPanel extends JPanel {
 
         add(formulario, BorderLayout.NORTH);
         add(new JScrollPane(areaResultado), BorderLayout.CENTER);
-    }
-
-    public JTextField getCampoNombre() {
-        return campoNombre;
-    }
-
-    public JButton getBtnGuardar() {
-        return btnGuardar;
     }
 
     public void mostrarMensaje(String mensaje) {
