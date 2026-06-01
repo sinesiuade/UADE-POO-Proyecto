@@ -1,5 +1,6 @@
 package com.tpo.model.entities;
 
+import com.tpo.model.Enums.CondicionImpositiva;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -43,9 +44,7 @@ public class Proveedor {
     }
 
     public List<CertificadoDeExclusion> obtenerCertificadosDeExclusionVigentes() {
-        return certificadosDeExclusion.stream()
-                .filter(CertificadoDeExclusion::isVigente)
-                .collect(Collectors.toList());
+        return new ArrayList<>(certificadosDeExclusion);
     }
 
     public double getDeudaActual() {

@@ -1,5 +1,6 @@
 package com.tpo.model.entities;
 
+import com.tpo.model.Enums.EstadoCancelacionDocumentoComercial;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

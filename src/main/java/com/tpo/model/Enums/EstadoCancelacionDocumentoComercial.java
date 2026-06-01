@@ -1,4 +1,4 @@
-package com.tpo.model.entities;
+package com.tpo.model.Enums;
 
 public enum EstadoCancelacionDocumentoComercial {
     PENDIENTE,

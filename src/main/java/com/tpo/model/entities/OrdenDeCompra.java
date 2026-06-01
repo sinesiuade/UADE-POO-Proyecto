@@ -1,5 +1,6 @@
 package com.tpo.model.entities;
 
+import com.tpo.model.Enums.EstadoOrdenDeCompra;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -40,7 +41,7 @@ public class OrdenDeCompra {
     }
 
     public void confirmarOrdenDeCompra() {
-        setEstado(EstadoOrdenDeCompra.CONFIRMADA);
+        setEstado(EstadoOrdenDeCompra.EMITIDA);
     }
 
     public void sumarBruto(double precio) {
