@@ -7,15 +7,17 @@ Aplicación de escritorio en **Java** con arquitectura **MVC** e interfaz gráfi
 
 Proyecto base con separación de responsabilidades en tres capas: modelo (datos y lógica de negocio), vista (interfaz gráfica) y controlador (coordinación entre ambas).
 
+**Versión del proyecto:** `1.0.3` — artifact `uade-poo-proyecto`
+
 ## Tecnologías
 
-- Java 25
-- Maven
+- Java 21
+- Maven 3.9+
 - Swing (`javax.swing`)
-- Gson (persistencia en archivos JSON)
-- SLF4J + Logback (logs)
-- Lombok
-- JUnit 5 (tests)
+- Gson 2.11.0 (persistencia en archivos JSON)
+- SLF4J 2.0.13 + Logback 1.5.6 (logs)
+- Lombok 1.18.46
+- JUnit 5.10.2 (tests)
 
 ## Arquitectura MVC
 
@@ -36,32 +38,37 @@ src/main/java/com/tpo/
 │   ├── repositories/  # Acceso y persistencia de datos
 │   └── services/      # Lógica de negocio
 ├── view/
-│   ├── frames/
-│   ├── panels/
-│   └── dialogs/
+│   ├── frames/        # Ventanas principales (JFrame)
+│   ├── panels/        # Paneles reutilizables (JPanel)
+│   └── dialogs/       # Diálogos (JDialog)
 ├── controller/
-└── util/
+└── util/              # Constantes y utilidades (AppConstants, Validator)
 
-data/                    # Archivos JSON de persistencia
-src/main/resources/      # logback.xml y otros recursos
-src/test/java/           # Tests con JUnit 5
+resources/
+└── images/            # Imágenes y recursos gráficos
+
+data/                  # Archivos JSON de persistencia
+target/classes/        # logback.xml y clases compiladas
+logs/                  # app.log generado en ejecución
+src/test/java/         # Tests con JUnit 5
 ```
 
 ## Requisitos
 
-- JDK 25
-- Lombok 1.18.40+ (el proyecto usa 1.18.46)
+- JDK 21
+- Lombok 1.18.46
 - Maven 3.9+
 - IDE compatible (IntelliJ IDEA, Eclipse, VS Code con extensión Java)
 
 ## Dependencias (Maven)
 
-| Librería | Uso |
-|----------|-----|
-| **Gson** | Leer y escribir datos en archivos `.json` (carpeta `data/`) |
-| **SLF4J + Logback** | Registro de eventos y errores (`logs/app.log`) |
-| **Lombok** | Reducir código repetitivo en entidades (`@Getter`, `@Setter`, etc.) |
-| **JUnit 5** | Tests unitarios en `src/test/java` |
+| Librería | Versión | Uso |
+|----------|---------|-----|
+| **Gson** | 2.11.0 | Leer y escribir datos en archivos `.json` (carpeta `data/`) |
+| **SLF4J** | 2.0.13 | API de logging |
+| **Logback** | 1.5.6 | Implementación de logs (`logs/app.log`) |
+| **Lombok** | 1.18.46 | Reducir código repetitivo en entidades (`@Getter`, `@Setter`, etc.) |
+| **JUnit 5** | 5.10.2 | Tests unitarios en `src/test/java` |
 
 ## Persistencia (JSON)
 
