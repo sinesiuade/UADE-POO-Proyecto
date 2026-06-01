@@ -1,6 +1,8 @@
-package com.tpo.model.entities;
+package com.tpo.model.entities.supplier;
 
 import com.tpo.model.Enums.CondicionImpositiva;
+import com.tpo.model.entities.catalog.Rubro;
+import com.tpo.model.entities.tax.CertificadoDeExclusion;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -8,7 +10,6 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Getter
 @Setter

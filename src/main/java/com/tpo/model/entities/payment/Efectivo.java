@@ -1,4 +1,4 @@
-package com.tpo.model.entities;
+package com.tpo.model.entities.payment;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

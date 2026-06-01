@@ -1,5 +1,8 @@
-package com.tpo.model.entities;
+package com.tpo.model.entities.order;
 
+import com.tpo.model.entities.document.DocumentoComercial;
+import com.tpo.model.entities.supplier.Proveedor;
+import com.tpo.model.entities.tax.Impuesto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

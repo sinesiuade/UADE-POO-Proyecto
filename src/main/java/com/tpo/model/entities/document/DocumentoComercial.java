@@ -1,6 +1,7 @@
-package com.tpo.model.entities;
+package com.tpo.model.entities.document;
 
 import com.tpo.model.Enums.EstadoCancelacionDocumentoComercial;
+import com.tpo.model.entities.supplier.Proveedor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,6 +18,7 @@ public abstract class DocumentoComercial {
     private Date fechaEmision;
     private Proveedor proveedor;
     private EstadoCancelacionDocumentoComercial estadoCancelacion;
+    private DetalleItemDocComercial detalleItemDocComercial;
 
     protected DocumentoComercial(int numero, float importeTotal, Date fechaEmision,
                                  Proveedor proveedor, EstadoCancelacionDocumentoComercial estadoCancelacion) {

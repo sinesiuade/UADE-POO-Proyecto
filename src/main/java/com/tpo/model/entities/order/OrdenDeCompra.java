@@ -1,6 +1,8 @@
-package com.tpo.model.entities;
+package com.tpo.model.entities.order;
 
 import com.tpo.model.Enums.EstadoOrdenDeCompra;
+import com.tpo.model.entities.catalog.Item;
+import com.tpo.model.entities.supplier.Proveedor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

@@ -1,4 +1,4 @@
-package com.tpo.model.entities;
+package com.tpo.model.entities.catalog;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,5 +1,6 @@
-package com.tpo.model.entities;
+package com.tpo.model.entities.catalog;
 
+import com.tpo.model.entities.supplier.Proveedor;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

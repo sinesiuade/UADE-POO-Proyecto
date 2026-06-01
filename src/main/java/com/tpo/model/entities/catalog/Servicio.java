@@ -1,4 +1,4 @@
-package com.tpo.model.entities;
+package com.tpo.model.entities.catalog;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Rubro {
+public class Servicio extends Item {
 
-    private String nombre;
+    private String tipoDePrestacion;
 }
