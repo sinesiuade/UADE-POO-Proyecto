@@ -1,10 +1,7 @@
 package com.tpo;
 
-import com.tpo.controller.EjemploController;
-import com.tpo.model.repositories.EjemploRepository;
-import com.tpo.model.services.EjemploService;
 import com.tpo.view.frames.MainFrame;
-import com.tpo.view.panels.EjemploPanel;
+import com.tpo.view.panels.MainPanel;
 
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -16,12 +13,7 @@ public class Main {
 
         SwingUtilities.invokeLater(() -> {
             MainFrame frame = new MainFrame();
-            EjemploPanel panel = new EjemploPanel();
-            frame.setPanelPrincipal(panel);
-
-            EjemploService servicio = new EjemploService(new EjemploRepository());
-            new EjemploController(panel, servicio);
-
+            frame.setPanelPrincipal(new MainPanel());
             frame.setVisible(true);
         });
     }
