@@ -16,6 +16,7 @@ public class MainPanel extends JPanel {
         tabbedPane.addTab("Items", new ItemPanel());
         tabbedPane.addTab("Órdenes de Compra", new OrdenDeCompraPanel());
         tabbedPane.addTab("Facturas", new FacturaPanel());
+        tabbedPane.addTab("Notas C/D", new NotaPanel());
         tabbedPane.addTab("Órdenes de Pago", new OrdenDePagoPanel());
         tabbedPane.addTab("Impuestos", new ImpuestoPanel());
         tabbedPane.addTab("Consultas", new ConsultaPanel());

@@ -1,6 +1,7 @@
 package com.tpo.controller;
 
 import com.tpo.model.dto.FacturaDTO;
+import com.tpo.model.dto.NotaDTO;
 import com.tpo.model.dto.OrdenDeCompraDTO;
 import com.tpo.model.dto.OrdenDePagoDTO;
 import com.tpo.model.dto.ReporteDTO;
@@ -8,6 +9,9 @@ import com.tpo.model.entities.order.DetalleItemOC;
 import com.tpo.model.entities.supplier.Proveedor;
 import com.tpo.model.entities.tax.TipoImpuesto;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,8 +27,9 @@ public class ConsultaController {
     private final Map<String, Supplier<ReporteDTO>> reportes = new LinkedHashMap<>();
 
     private ConsultaController() {
-        // 1. Trazabilidad Documental
+        // 1. Trazabilidad Documental (Facturas, Notas de Crédito y Débito)
         reportes.put("Documentos recibidos por proveedor", this::documentosPorProveedor);
+        reportes.put("Documentos recibidos por tipo", this::documentosPorTipo);
         reportes.put("Documentos recibidos por período", this::documentosPorPeriodo);
         reportes.put("Documentos recibidos (detalle por fecha)", this::documentosDetalle);
         // 2. Gestión de Deuda (Cuenta Corriente)
@@ -73,42 +78,86 @@ public class ConsultaController {
 
     // --- 1. Trazabilidad Documental -------------------------------------------------------
 
+    /** Documento recibido normalizado (Factura, Nota de Crédito o Débito) para trazabilidad. */
+    private static class DocRecibido {
+        final Date fecha;
+        final String proveedor;
+        final double importe;
+        final String tipo;
+        final String estado;
+
+        DocRecibido(Date fecha, String proveedor, double importe, String tipo, String estado) {
+            this.fecha = fecha;
+            this.proveedor = proveedor;
+            this.importe = importe;
+            this.tipo = tipo;
+            this.estado = estado;
+        }
+    }
+
+    /** Lista unificada de documentos recibidos: Facturas + Notas de Crédito/Débito. */
+    private List<DocRecibido> documentosRecibidos() {
+        List<DocRecibido> docs = new ArrayList<>();
+        for (FacturaDTO f : FacturaController.getInstance().getFacturas()) {
+            docs.add(new DocRecibido(f.getFechaEmision(), nombre(f.getProveedor()), f.getImporteTotal(),
+                    "Factura", f.isObservada() ? "Observada" : "Registrada"));
+        }
+        for (NotaDTO n : NotaController.getInstance().getNotas()) {
+            docs.add(new DocRecibido(n.getFechaEmision(), nombre(n.getProveedor()), n.getImporteTotal(),
+                    n.getTipo(), "Registrada"));
+        }
+        return docs;
+    }
+
     private ReporteDTO documentosPorProveedor() {
         ReporteDTO r = new ReporteDTO("Documentos recibidos por proveedor",
-                new String[]{"Proveedor", "Cantidad", "Total Facturado"});
+                new String[]{"Proveedor", "Cantidad", "Total"});
         Map<String, double[]> acc = new LinkedHashMap<>(); // [cantidad, total]
-        for (FacturaDTO f : FacturaController.getInstance().getFacturas()) {
-            double[] v = acc.computeIfAbsent(nombre(f.getProveedor()), k -> new double[2]);
+        for (DocRecibido d : documentosRecibidos()) {
+            double[] v = acc.computeIfAbsent(d.proveedor, k -> new double[2]);
             v[0]++;
-            v[1] += f.getImporteTotal();
+            v[1] += d.importe;
         }
         acc.forEach((prov, v) -> r.agregarFila(prov, (int) v[0], String.format("%.2f", v[1])));
         return r;
     }
 
+    private ReporteDTO documentosPorTipo() {
+        ReporteDTO r = new ReporteDTO("Documentos recibidos por tipo",
+                new String[]{"Tipo", "Cantidad", "Total"});
+        Map<String, double[]> acc = new LinkedHashMap<>();
+        for (DocRecibido d : documentosRecibidos()) {
+            double[] v = acc.computeIfAbsent(d.tipo, k -> new double[2]);
+            v[0]++;
+            v[1] += d.importe;
+        }
+        acc.forEach((tipo, v) -> r.agregarFila(tipo, (int) v[0], String.format("%.2f", v[1])));
+        return r;
+    }
+
     private ReporteDTO documentosDetalle() {
         ReporteDTO r = new ReporteDTO("Documentos recibidos (detalle)",
-                new String[]{"Fecha", "Proveedor", "Importe", "Estado"});
+                new String[]{"Fecha", "Tipo", "Proveedor", "Importe", "Estado"});
         java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy");
-        FacturaController.getInstance().getFacturas().stream()
-                .sorted(java.util.Comparator.comparing(FacturaDTO::getFechaEmision,
-                        java.util.Comparator.nullsLast(java.util.Comparator.naturalOrder())))
-                .forEach(f -> r.agregarFila(
-                        f.getFechaEmision() != null ? sdf.format(f.getFechaEmision()) : "",
-                        nombre(f.getProveedor()),
-                        String.format("%.2f", f.getImporteTotal()),
-                        f.isObservada() ? "Observada" : "Registrada"));
+        documentosRecibidos().stream()
+                .sorted(Comparator.comparing(d -> d.fecha, Comparator.nullsLast(Comparator.naturalOrder())))
+                .forEach(d -> r.agregarFila(
+                        d.fecha != null ? sdf.format(d.fecha) : "",
+                        d.tipo,
+                        d.proveedor,
+                        String.format("%.2f", d.importe),
+                        d.estado));
         return r;
     }
 
     private ReporteDTO documentosPorPeriodo() {
         ReporteDTO r = new ReporteDTO("Documentos recibidos por período",
-                new String[]{"Período", "Cantidad", "Total Facturado"});
+                new String[]{"Período", "Cantidad", "Total"});
         Map<String, double[]> acc = new java.util.TreeMap<>(); // ordenado por período
-        for (FacturaDTO f : FacturaController.getInstance().getFacturas()) {
-            double[] v = acc.computeIfAbsent(periodo(f.getFechaEmision()), k -> new double[2]);
+        for (DocRecibido d : documentosRecibidos()) {
+            double[] v = acc.computeIfAbsent(periodo(d.fecha), k -> new double[2]);
             v[0]++;
-            v[1] += f.getImporteTotal();
+            v[1] += d.importe;
         }
         acc.forEach((per, v) -> r.agregarFila(per, (int) v[0], String.format("%.2f", v[1])));
         return r;
@@ -117,10 +166,13 @@ public class ConsultaController {
     // --- 2. Gestión de Deuda --------------------------------------------------------------
 
     private Map<String, double[]> calcularSaldos() {
-        // [facturado, pagado]
+        // [deudaGenerada, pagado] -- deuda = Facturas + Notas de Débito - Notas de Crédito
         Map<String, double[]> acc = new LinkedHashMap<>();
         for (FacturaDTO f : FacturaController.getInstance().getFacturas()) {
             acc.computeIfAbsent(nombre(f.getProveedor()), k -> new double[2])[0] += f.getImporteTotal();
+        }
+        for (NotaDTO n : NotaController.getInstance().getNotas()) {
+            acc.computeIfAbsent(nombre(n.getProveedor()), k -> new double[2])[0] += n.getImpactoDeuda();
         }
         for (OrdenDePagoDTO p : OrdenDePagoController.getInstance().getPagos()) {
             acc.computeIfAbsent(nombre(p.getProveedor()), k -> new double[2])[1] += p.getTotalBrutoPagado();
@@ -130,7 +182,7 @@ public class ConsultaController {
 
     private ReporteDTO cuentaCorrientePorProveedor() {
         ReporteDTO r = new ReporteDTO("Cuenta corriente por proveedor",
-                new String[]{"Proveedor", "Total Facturado", "Total Pagado", "Saldo"});
+                new String[]{"Proveedor", "Deuda Generada", "Total Pagado", "Saldo"});
         calcularSaldos().forEach((prov, v) ->
                 r.agregarFila(prov, String.format("%.2f", v[0]), String.format("%.2f", v[1]),
                         String.format("%.2f", v[0] - v[1])));

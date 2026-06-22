@@ -53,4 +53,12 @@ public abstract class DocumentoComercial {
     public float getTotalBruto() {
         return recalcularImporteTotal();
     }
+
+    /**
+     * Impacto del documento en la cuenta corriente del proveedor (consigna §4).
+     * Por defecto incrementa la deuda (Factura, Nota de Débito); la Nota de Crédito lo redefine.
+     */
+    public double getImpactoCuentaCorriente() {
+        return importeTotal;
+    }
 }

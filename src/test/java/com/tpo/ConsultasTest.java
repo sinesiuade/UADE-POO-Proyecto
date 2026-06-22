@@ -161,6 +161,36 @@ class ConsultasTest {
     }
 
     @Test
+    void notas_impactanCuentaCorrienteSegunTipo() {
+        com.tpo.model.entities.supplier.Proveedor p = new com.tpo.model.entities.supplier.Proveedor();
+        p.setRazonSocial("NotaProbe SA");
+
+        // Factura 1000 (deuda) + Nota de Débito 200 (suma) - Nota de Crédito 300 (resta) = 900
+        Rubro rubro = new Rubro("Servicios");
+        Producto item = new Producto();
+        item.setDescripcion("Mantenimiento");
+        item.setRubro(rubro);
+        p.getRubros().add(rubro);
+        p.getItemsProvistos().add(new ItemProveedor(100.0, item, p));
+        OrdenDeCompra oc = new OrdenDeCompra(950, new Date(), p, null);
+        oc.agregarItem(item, 10, 100.0);
+        OrdenDeCompraController.getInstance().crearOrdenDeCompra(oc);
+        List<OrdenDeCompra> ordenes = new ArrayList<>();
+        ordenes.add(oc);
+        FacturaController.getInstance().generarFactura(p, ordenes, false, 100.0); // 1000
+
+        com.tpo.controller.NotaController.getInstance()
+                .registrarNota(com.tpo.model.dto.NotaDTO.DEBITO, p, 8001, 200f, new Date());
+        com.tpo.controller.NotaController.getInstance()
+                .registrarNota(com.tpo.model.dto.NotaDTO.CREDITO, p, 8002, 300f, new Date());
+
+        ReporteDTO r = ConsultaController.getInstance().ejecutar("Cuenta corriente por proveedor");
+        Object[] fila = buscarFila(r, "NotaProbe SA");
+        assertNotNull(fila);
+        assertEquals(fmt(900), String.valueOf(fila[1])); // deuda generada: 1000 + 200 - 300
+    }
+
+    @Test
     void documentosPendientesDePago_listaPendienteYNoLosCancelados() {
         ReporteDTO r = ConsultaController.getInstance().ejecutar("Documentos pendientes de pago");
 

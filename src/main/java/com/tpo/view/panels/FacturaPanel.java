@@ -14,6 +14,7 @@ public class FacturaPanel extends BaseListPanel {
     public FacturaPanel() {
         super("+ Nueva Factura", new String[]{"Proveedor", "Fecha de Emisión", "Importe Total", "Detalles", "Estado"});
         controller = FacturaController.getInstance();
+        refrescar();
     }
 
     @Override

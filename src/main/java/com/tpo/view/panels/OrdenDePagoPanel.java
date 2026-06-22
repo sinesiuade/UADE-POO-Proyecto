@@ -14,6 +14,7 @@ public class OrdenDePagoPanel extends BaseListPanel {
     public OrdenDePagoPanel() {
         super("+ Nueva Orden de Pago", new String[]{"Proveedor", "Fecha de Emisión", "Total Bruto", "Total Retenido", "Total Neto", "Medio de Pago"});
         controller = OrdenDePagoController.getInstance();
+        refrescar();
     }
 
     @Override

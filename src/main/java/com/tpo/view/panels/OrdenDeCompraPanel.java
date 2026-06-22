@@ -14,6 +14,7 @@ public class OrdenDeCompraPanel extends BaseListPanel {
     public OrdenDeCompraPanel() {
         super("+ Nueva Orden de Compra", new String[]{"Número", "Fecha", "Proveedor", "Estado"});
         controller = OrdenDeCompraController.getInstance();
+        refrescar();
     }
 
     @Override
