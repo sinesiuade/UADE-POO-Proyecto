@@ -17,12 +17,12 @@ public class DetalleItemOC {
     private int cantidad;
     private double precioAcordado;
 
-    /** Subtotal de la línea: cantidad por el precio unitario acordado. */
+    /** Subtotal = cantidad x precio acordado. */
     public double getPrecioTotal() {
         return cantidad * precioAcordado;
     }
 
-    /** Traduce esta línea de la OC a un detalle de documento comercial (para la Factura). */
+    /** Traduce la línea de OC a un detalle de documento comercial. */
     public DetalleItemDocComercial getDatosParaItemFactura() {
         String concepto = item != null ? item.getDescripcion() : null;
         double iva = item != null ? item.getPorcentajeIva() : 0.0;

@@ -26,7 +26,7 @@ public class FacturaDTO {
         return importeTotal - montoPagado;
     }
 
-    /** Estado de cancelación derivado del monto pagado (consigna sección 4). */
+    /** Estado de cancelación según el monto pagado. */
     public EstadoCancelacionDocumentoComercial getEstadoCancelacion() {
         if (montoPagado <= 0) {
             return EstadoCancelacionDocumentoComercial.PENDIENTE;

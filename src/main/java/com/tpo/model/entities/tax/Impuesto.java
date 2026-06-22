@@ -19,12 +19,7 @@ public class Impuesto {
     private TipoImpuesto nombre;
     private double porcentaje;
 
-    /**
-     * Calcula la retención de este impuesto para un proveedor sobre un monto bruto.
-     * Sigue el Diagrama de Secuencia "Generación de Orden de Pago": consulta la
-     * condición impositiva y los certificados de exclusión del proveedor y, si
-     * corresponde aplicar, retiene el porcentaje configurado.
-     */
+    /** Retención del impuesto sobre el bruto, si corresponde aplicarlo. */
     public double calcularRetencion(Proveedor proveedor, double totalBruto) {
         CondicionImpositiva condicion = proveedor.getCondicionImpositiva();
         List<CertificadoDeExclusion> certificados = proveedor.getListaCertificadosDeExclusion();
@@ -35,11 +30,7 @@ public class Impuesto {
         return totalBruto * (porcentaje / 100.0);
     }
 
-    /**
-     * Determina si el impuesto debe aplicarse. No se aplica si el proveedor es
-     * IVA Exento / Consumidor Final, o si tiene un certificado de exclusión
-     * vigente para este tipo de impuesto.
-     */
+    /** No aplica si el proveedor es Exento/Consumidor Final o tiene certificado vigente. */
     public boolean validarAplicacion(CondicionImpositiva condicion, List<CertificadoDeExclusion> certificados) {
         if (condicion == CondicionImpositiva.IVA_EXENTO || condicion == CondicionImpositiva.CONSUMIDOR_FINAL) {
             return false;

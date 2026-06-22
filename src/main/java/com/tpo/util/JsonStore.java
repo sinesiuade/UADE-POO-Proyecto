@@ -16,11 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Persistencia simple en archivos JSON (carpeta {@code data/} en la raíz del proyecto).
- * Cada controlador guarda y carga su lista de registros planos con Gson.
- *
- * <p>El guardado se puede desactivar con la propiedad de sistema {@code app.persistence=off}
- * (los tests lo usan para no sobrescribir los datos semilla).</p>
+ * Persistencia en archivos JSON (carpeta {@code data/}) con Gson.
+ * El guardado se desactiva con {@code -Dapp.persistence=off} (usado por los tests).
  */
 public final class JsonStore {
 
@@ -35,7 +32,7 @@ public final class JsonStore {
         return "off".equalsIgnoreCase(System.getProperty("app.persistence"));
     }
 
-    /** Carga una lista desde {@code data/<archivo>}; devuelve lista vacía si no existe o falla. */
+    /** Carga una lista desde {@code data/<archivo>} (vacía si no existe). */
     public static <T> List<T> load(String archivo, Type listType) {
         Path path = DATA_DIR.resolve(archivo);
         if (!Files.exists(path)) {
@@ -50,7 +47,7 @@ public final class JsonStore {
         }
     }
 
-    /** Guarda {@code data} en {@code data/<archivo>} (salvo que la persistencia esté desactivada). */
+    /** Guarda {@code data} en {@code data/<archivo>}. */
     public static void save(String archivo, Object data) {
         if (persistenciaDesactivada()) {
             return;

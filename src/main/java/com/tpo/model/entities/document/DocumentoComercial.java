@@ -21,10 +21,7 @@ public abstract class DocumentoComercial {
     private Proveedor proveedor;
     private EstadoCancelacionDocumentoComercial estadoCancelacion;
     private List<DetalleItemDocComercial> detalleItems = new ArrayList<>();
-    /**
-     * Marca el documento como "Observado" (ver consigna: diferencia de precios con la OC).
-     * Es una dimensión distinta del estado de cancelación, por eso se modela aparte.
-     */
+    /** Documento "Observado" (diferencia de precios con la OC). */
     private boolean observada;
 
     protected DocumentoComercial(int numero, float importeTotal, Date fechaEmision,
@@ -54,10 +51,7 @@ public abstract class DocumentoComercial {
         return recalcularImporteTotal();
     }
 
-    /**
-     * Impacto del documento en la cuenta corriente del proveedor (consigna §4).
-     * Por defecto incrementa la deuda (Factura, Nota de Débito); la Nota de Crédito lo redefine.
-     */
+    /** Impacto en la cuenta corriente; por defecto suma deuda (la Nota de Crédito lo redefine). */
     public double getImpactoCuentaCorriente() {
         return importeTotal;
     }

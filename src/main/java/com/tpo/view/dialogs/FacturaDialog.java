@@ -28,11 +28,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Diálogo de Factura. Reproduce, sobre una línea representativa, el Diagrama de Secuencia
- * "Generación de Factura": valida origen (OC previa o autorización), verifica congruencia de
- * rubro/ítem y aplica el control de precios (Observada si el precio facturado difiere del de la OC).
- */
+/** Diálogo de Factura (una línea representativa del flujo de generación). */
 public class FacturaDialog extends JDialog {
 
     private final JTextField txtProveedor;
@@ -52,7 +48,7 @@ public class FacturaDialog extends JDialog {
         this(parent, null, -1);
     }
 
-    /** Modo edición: editIndex es la posición en la lista del controller */
+    /** Modo edición */
     public FacturaDialog(Frame parent, FacturaDTO existing, int editIndex) {
         super(parent, existing == null ? "Nueva Factura" : "Editar Factura", true);
         this.editIndex = editIndex;
@@ -133,7 +129,7 @@ public class FacturaDialog extends JDialog {
             return;
         }
 
-        // Proveedor habilitado para el rubro y autorizado a proveer el ítem (relación N:M).
+        // Proveedor habilitado para el rubro y el ítem.
         Rubro rubro = new Rubro(txtRubro.getText().trim());
         Producto item = new Producto();
         item.setDescripcion(txtConcepto.getText().trim());

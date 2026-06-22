@@ -11,14 +11,14 @@ public class Factura extends DocumentoComercial {
         super();
     }
 
-    /** Constructor del Diagrama de Secuencia "Generación de Factura": new Factura(proveedor). */
+    /** Factura para un proveedor (estado inicial PENDIENTE). */
     public Factura(Proveedor proveedor) {
         setProveedor(proveedor);
         setFechaEmision(new Date());
         setEstadoCancelacion(EstadoCancelacionDocumentoComercial.PENDIENTE);
     }
 
-    /** Crea y agrega una línea de detalle a la factura, recalculando el importe total. */
+    /** Agrega una línea de detalle y recalcula el importe. */
     public DetalleItemDocComercial crearDetalle(String concepto, int cantidad, double precio, double iva) {
         DetalleItemDocComercial detalle = new DetalleItemDocComercial(concepto, cantidad, precio, iva);
         agregarDetalle(detalle);

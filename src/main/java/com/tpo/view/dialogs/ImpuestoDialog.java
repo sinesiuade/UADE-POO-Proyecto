@@ -33,7 +33,7 @@ public class ImpuestoDialog extends JDialog {
         this(parent, null, -1);
     }
 
-    /** Modo edición: editIndex es la posición en la lista del controller */
+    /** Modo edición */
     public ImpuestoDialog(Frame parent, Impuesto existing, int editIndex) {
         super(parent, existing == null ? "Agregar Impuesto" : "Editar Impuesto", true);
         this.editIndex = editIndex;

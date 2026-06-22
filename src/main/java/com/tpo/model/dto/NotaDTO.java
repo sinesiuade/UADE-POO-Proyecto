@@ -8,7 +8,7 @@ import lombok.Setter;
 
 import java.util.Date;
 
-/** Nota de Crédito o Débito recibida. El tipo define el impacto en la cuenta corriente. */
+/** Nota de Crédito o Débito recibida. */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -23,7 +23,7 @@ public class NotaDTO {
     private float importeTotal;
     private String tipo;
 
-    /** Impacto en la deuda: la Nota de Crédito resta, la de Débito suma. */
+    /** Impacto en la deuda: NC resta, ND suma. */
     public double getImpactoDeuda() {
         return CREDITO.equals(tipo) ? -importeTotal : importeTotal;
     }

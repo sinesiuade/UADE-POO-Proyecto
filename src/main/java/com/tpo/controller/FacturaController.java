@@ -17,13 +17,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Controlador Singleton de Facturas.
- * Implementa el Diagrama de Secuencia "Generación de Factura": valida el origen (OC previa o
- * autorización), arma el detalle a partir de las OC relacionadas verificando que el proveedor
- * pertenezca al rubro y provea el ítem, y aplica el control de precios (marca "Observada" si el
- * precio facturado difiere del precio acordado en la OC). Persiste en {@code data/facturas.json}.
- */
+/** Controlador Singleton de Facturas. */
 public class FacturaController {
 
     private static final String ARCHIVO = "facturas.json";
@@ -46,16 +40,7 @@ public class FacturaController {
         return INSTANCE;
     }
 
-    /**
-     * Genera una factura a partir de las órdenes de compra relacionadas.
-     *
-     * @param proveedor               proveedor emisor
-     * @param ordenesRelacionadas     OC que amparan los conceptos facturados
-     * @param autorizadoSupervisor    autorización del supervisor (requerida si no hay OC previa)
-     * @param precioFacturadoUnitario precio unitario que llega en la factura; si es &gt; 0 se usa
-     *                                para el control de precios contra el precio de la OC, si es
-     *                                &le; 0 se toma el precio acordado de la OC (sin diferencia)
-     */
+    /** Genera una factura a partir de las OC relacionadas (precioFacturadoUnitario &le; 0 = usa el de la OC). */
     public FacturaDTO generarFactura(Proveedor proveedor, List<OrdenDeCompra> ordenesRelacionadas,
                                      boolean autorizadoSupervisor, double precioFacturadoUnitario) {
         FacturaDTO dto = armar(proveedor, ordenesRelacionadas, autorizadoSupervisor, precioFacturadoUnitario);
@@ -79,7 +64,7 @@ public class FacturaController {
 
     private FacturaDTO armar(Proveedor proveedor, List<OrdenDeCompra> ordenesRelacionadas,
                              boolean autorizadoSupervisor, double precioFacturadoUnitario) {
-        // Validación de origen: debe existir OC previa o autorización de un supervisor.
+        // Origen: OC previa o autorización del supervisor.
         boolean existeOC = ordenesRelacionadas != null && !ordenesRelacionadas.isEmpty();
         if (!existeOC && !autorizadoSupervisor) {
             throw new IllegalStateException("No existen OC previas: se requiere autorización de un supervisor.");
@@ -94,7 +79,7 @@ public class FacturaController {
                     Item item = detalleOC.getItem();
                     Rubro rubro = item != null ? item.getRubro() : null;
 
-                    // Coherencia de conceptos: el proveedor pertenece al rubro y provee el ítem.
+                    // El proveedor pertenece al rubro y provee el ítem.
                     if (proveedor.perteneceARubro(rubro) && proveedor.proveeItem(item)) {
                         double precioFacturado = precioFacturadoUnitario > 0
                                 ? precioFacturadoUnitario
@@ -102,7 +87,7 @@ public class FacturaController {
 
                         factura.crearDetalle(datos.getConcepto(), datos.getCantidad(), precioFacturado, datos.getIva());
 
-                        // Control de precios: si difiere del acordado, la factura queda Observada.
+                        // Si difiere del acordado, queda Observada.
                         if (precioFacturado != detalleOC.getPrecioAcordado()) {
                             factura.setObservada(true);
                         }
@@ -116,11 +101,7 @@ public class FacturaController {
                 factura.getTotalBruto(), factura.getDetalleItems().size(), factura.isObservada(), 0.0);
     }
 
-    /**
-     * Aplica un pago a las facturas pendientes del proveedor (las más antiguas primero),
-     * actualizando su monto pagado. Lo invoca el flujo de Orden de Pago para mantener
-     * la cuenta corriente y el estado de cancelación de cada documento.
-     */
+    /** Aplica un pago a las facturas pendientes del proveedor (las más antiguas primero). */
     public void aplicarPago(String proveedor, double monto) {
         if (proveedor == null || monto <= 0) {
             return;

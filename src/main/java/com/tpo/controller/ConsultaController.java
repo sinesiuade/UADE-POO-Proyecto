@@ -17,11 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-/**
- * Controlador Singleton del módulo "Consultas Generales y Reportes de Gestión".
- * Implementa las Consultas Mínimas Obligatorias (consigna, sección 7) leyendo los datos
- * cargados en los controladores de cada módulo. No guarda estado propio: solo consulta.
- */
+/** Controlador Singleton de Consultas y Reportes. Lee de los demás controladores. */
 public class ConsultaController {
 
     private final Map<String, Supplier<ReporteDTO>> reportes = new LinkedHashMap<>();
@@ -71,14 +67,14 @@ public class ConsultaController {
         return p != null && p.getRazonSocial() != null ? p.getRazonSocial() : "(sin proveedor)";
     }
 
-    /** Período mensual (yyyy-MM) de una fecha; sirve para agrupar "por día y por período". */
+    /** Período mensual (yyyy-MM) de una fecha. */
     private static String periodo(java.util.Date fecha) {
         return fecha != null ? new java.text.SimpleDateFormat("yyyy-MM").format(fecha) : "(sin fecha)";
     }
 
     // --- 1. Trazabilidad Documental -------------------------------------------------------
 
-    /** Documento recibido normalizado (Factura, Nota de Crédito o Débito) para trazabilidad. */
+    /** Documento recibido normalizado (Factura o Nota). */
     private static class DocRecibido {
         final Date fecha;
         final String proveedor;
@@ -95,7 +91,7 @@ public class ConsultaController {
         }
     }
 
-    /** Lista unificada de documentos recibidos: Facturas + Notas de Crédito/Débito. */
+    /** Facturas + Notas unificadas. */
     private List<DocRecibido> documentosRecibidos() {
         List<DocRecibido> docs = new ArrayList<>();
         for (FacturaDTO f : FacturaController.getInstance().getFacturas()) {
@@ -166,7 +162,7 @@ public class ConsultaController {
     // --- 2. Gestión de Deuda --------------------------------------------------------------
 
     private Map<String, double[]> calcularSaldos() {
-        // [deudaGenerada, pagado] -- deuda = Facturas + Notas de Débito - Notas de Crédito
+        // [deudaGenerada, pagado] -- deuda = Facturas + ND - NC
         Map<String, double[]> acc = new LinkedHashMap<>();
         for (FacturaDTO f : FacturaController.getInstance().getFacturas()) {
             acc.computeIfAbsent(nombre(f.getProveedor()), k -> new double[2])[0] += f.getImporteTotal();

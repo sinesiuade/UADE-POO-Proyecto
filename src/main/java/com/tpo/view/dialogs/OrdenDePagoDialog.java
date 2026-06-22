@@ -32,11 +32,7 @@ import java.awt.Insets;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Diálogo de Orden de Pago. El total retenido y el neto NO se cargan a mano: los calcula el
- * controlador recorriendo los impuestos del sistema según la condición fiscal del proveedor
- * (Diagrama de Secuencia "Generación de Orden de Pago").
- */
+/** Diálogo de Orden de Pago (retenido y neto los calcula el controlador). */
 public class OrdenDePagoDialog extends JDialog {
 
     private static final String[] MEDIOS = {"Efectivo", "Transferencia", "Cheque Propio", "Cheque de Terceros"};
@@ -54,7 +50,7 @@ public class OrdenDePagoDialog extends JDialog {
         this(parent, null, -1);
     }
 
-    /** Modo edición: editIndex es la posición en la lista del controller */
+    /** Modo edición */
     public OrdenDePagoDialog(Frame parent, OrdenDePagoDTO existing, int editIndex) {
         super(parent, existing == null ? "Nueva Orden de Pago" : "Editar Orden de Pago", true);
         this.editIndex = editIndex;
@@ -133,7 +129,7 @@ public class OrdenDePagoDialog extends JDialog {
         proveedor.setRazonSocial(proveedorStr);
         proveedor.setCondicionImpositiva((CondicionImpositiva) comboCondicion.getSelectedItem());
 
-        // Los documentos a cancelar se representan por su importe total agregado.
+        // Los documentos a cancelar se representan por su importe agregado.
         Factura documento = new Factura(proveedor);
         documento.setImporteTotal(bruto);
         List<DocumentoComercial> documentos = new ArrayList<>();
@@ -153,7 +149,7 @@ public class OrdenDePagoDialog extends JDialog {
         dispose();
     }
 
-    /** Crea el medio de pago concreto según la opción elegida (el importe lo fija el controlador). */
+    /** Crea el medio de pago según la opción elegida. */
     private MedioDePago crearMedio(String label) {
         if (label == null) {
             return new Efectivo(0f);

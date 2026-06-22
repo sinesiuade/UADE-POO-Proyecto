@@ -23,7 +23,7 @@ public class CertificadoDeExclusion {
         return this.tipoImpuesto == tipo;
     }
 
-    /** El certificado está vigente si la fecha dada está dentro del rango [desde, hasta]. */
+    /** Vigente si la fecha está dentro de [desde, hasta]. */
     public boolean estaVigente(Date fecha) {
         if (fechaDesde == null || fechaHasta == null || fecha == null) {
             return false;

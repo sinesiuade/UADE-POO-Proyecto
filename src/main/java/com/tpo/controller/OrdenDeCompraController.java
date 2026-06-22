@@ -15,13 +15,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Controlador Singleton de Órdenes de Compra.
- * Implementa el Diagrama de Secuencia "Creación de Orden de Compra": al registrar la OC
- * recalcula el total bruto, verifica el límite de crédito del proveedor y define el estado
- * (EMITIDA si está dentro del límite, PENDIENTE_APROBACION si lo supera).
- * Persiste en {@code data/ordenes_compra.json}.
- */
+/** Controlador Singleton de Órdenes de Compra. */
 public class OrdenDeCompraController {
 
     private static final String ARCHIVO = "ordenes_compra.json";
@@ -44,7 +38,7 @@ public class OrdenDeCompraController {
         return INSTANCE;
     }
 
-    /** Crea la OC ejecutando la validación de límite de crédito y persiste su DTO. */
+    /** Crea la OC validando el límite de crédito. */
     public OrdenDeCompraDTO crearOrdenDeCompra(OrdenDeCompra oc) {
         OrdenDeCompraDTO dto = validarYMapear(oc);
         ordenes.add(dto);
@@ -64,7 +58,7 @@ public class OrdenDeCompraController {
         return Collections.unmodifiableList(ordenes);
     }
 
-    /** Recalcula el total bruto, define el estado según el límite de crédito y mapea a DTO. */
+    /** Recalcula el bruto, define el estado según el límite y mapea a DTO. */
     private OrdenDeCompraDTO validarYMapear(OrdenDeCompra oc) {
         oc.recalcularTotalBruto();
         boolean dentroDelLimite = oc.verificarLimiteDeCredito();

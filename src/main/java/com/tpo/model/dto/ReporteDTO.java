@@ -8,10 +8,7 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Resultado genérico de una consulta/reporte: título, encabezados de columna y filas.
- * Permite que el ConsultaController devuelva cualquier reporte y la vista lo muestre en una tabla.
- */
+/** Resultado genérico de un reporte: título, columnas y filas. */
 @Getter
 @Setter
 @NoArgsConstructor

@@ -14,12 +14,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Controlador Singleton de Notas de Crédito / Débito recibidas.
- * Modela la herencia de DocumentoComercial: la Nota de Débito incrementa la deuda y la
- * Nota de Crédito la disminuye (polimorfismo de getImpactoCuentaCorriente).
- * Persiste en {@code data/notas.json}.
- */
+/** Controlador Singleton de Notas de Crédito / Débito. */
 public class NotaController {
 
     private static final String ARCHIVO = "notas.json";
@@ -62,7 +57,7 @@ public class NotaController {
         return Collections.unmodifiableList(notas);
     }
 
-    /** Instancia el documento concreto según el tipo (herencia: NotaDeCredito / NotaDeDebito). */
+    /** Instancia el documento concreto según el tipo. */
     private DocumentoComercial crearDocumento(String tipo, Proveedor proveedor, int numero, float importe, Date fecha) {
         return NotaDTO.CREDITO.equals(tipo)
                 ? new NotaDeCredito(proveedor, numero, importe, fecha)

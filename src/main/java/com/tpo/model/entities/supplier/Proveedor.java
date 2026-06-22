@@ -48,12 +48,12 @@ public class Proveedor {
         this.limiteDeudaAutorizado = limiteDeudaAutorizado;
     }
 
-    /** Certificados de exclusión del proveedor (la vigencia la evalúa cada Impuesto). */
+    /** Certificados de exclusión del proveedor. */
     public List<CertificadoDeExclusion> getListaCertificadosDeExclusion() {
         return certificadosDeExclusion;
     }
 
-    /** El proveedor está habilitado para operar en el rubro indicado. */
+    /** Habilitado para operar en el rubro. */
     public boolean perteneceARubro(Rubro rubro) {
         if (rubro == null) {
             return false;
@@ -61,7 +61,7 @@ public class Proveedor {
         return rubros.stream().anyMatch(r -> r.getNombre() != null && r.getNombre().equals(rubro.getNombre()));
     }
 
-    /** El proveedor está autorizado a suministrar el ítem indicado (relación N:M vía ItemProveedor). */
+    /** Autorizado a suministrar el ítem (relación N:M). */
     public boolean proveeItem(Item item) {
         if (item == null) {
             return false;

@@ -21,12 +21,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Controlador Singleton de Órdenes de Pago.
- * Implementa el Diagrama de Secuencia "Generación de Orden de Pago": crea la OP, calcula
- * sus totales recorriendo los impuestos del sistema (retenciones) y persiste su DTO.
- * Persiste en {@code data/ordenes_pago.json}.
- */
+/** Controlador Singleton de Órdenes de Pago. */
 public class OrdenDePagoController {
 
     private static final String ARCHIVO = "ordenes_pago.json";
@@ -56,7 +51,7 @@ public class OrdenDePagoController {
     public OrdenDePagoDTO generarOrdenDePago(Proveedor proveedor, List<DocumentoComercial> documentos, MedioDePago medio) {
         OrdenDePagoDTO dto = calcular(proveedor, documentos, medio);
         pagos.add(dto);
-        // Imputa el pago a las facturas pendientes del proveedor (actualiza su estado de cancelación).
+        // Imputa el pago a las facturas pendientes del proveedor.
         if (proveedor != null) {
             FacturaController.getInstance().aplicarPago(proveedor.getRazonSocial(), dto.getTotalBrutoPagado());
         }
@@ -64,7 +59,7 @@ public class OrdenDePagoController {
         return dto;
     }
 
-    /** Regenera una OP existente (recalcula retenciones) y la reemplaza en la posición dada. */
+    /** Regenera una OP y la reemplaza en la posición dada. */
     public OrdenDePagoDTO editarOrdenDePago(int index, Proveedor proveedor, List<DocumentoComercial> documentos, MedioDePago medio) {
         OrdenDePagoDTO dto = calcular(proveedor, documentos, medio);
         pagos.set(index, dto);
@@ -94,7 +89,7 @@ public class OrdenDePagoController {
         return dto;
     }
 
-    /** Etiqueta legible del medio de pago (polimorfismo) para mostrar y agrupar en consultas. */
+    /** Etiqueta legible del medio de pago. */
     static String etiquetaMedio(MedioDePago medio) {
         if (medio instanceof Efectivo) return "Efectivo";
         if (medio instanceof Transferencia) return "Transferencia";

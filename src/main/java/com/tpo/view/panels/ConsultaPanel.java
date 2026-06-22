@@ -15,10 +15,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 
-/**
- * Panel del módulo "Consultas Generales y Reportes". Permite elegir una de las consultas
- * mínimas obligatorias y muestra su resultado en una tabla.
- */
+/** Panel de Consultas: elige un reporte y lo muestra en una tabla. */
 public class ConsultaPanel extends JPanel {
 
     private final ConsultaController controller = ConsultaController.getInstance();

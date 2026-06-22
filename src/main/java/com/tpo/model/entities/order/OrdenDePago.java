@@ -26,9 +26,9 @@ public class OrdenDePago {
     private float totalBrutoPagado;
     private float totalRetenido;
     private float totalNetoAPagar;
-    /** Retención discriminada por tipo de impuesto (para el reporte fiscal). */
+    /** Retención discriminada por impuesto. */
     private Map<TipoImpuesto, Double> retencionesPorImpuesto = new LinkedHashMap<>();
-    /** Medios de pago con los que se cubre la OP (polimorfismo: Efectivo, Transferencia, Cheque...). */
+    /** Medios de pago de la OP (polimorfismo). */
     private List<MedioDePago> mediosDePago = new ArrayList<>();
 
     public OrdenDePago(Proveedor proveedor, List<DocumentoComercial> listaDocumentos) {
@@ -38,11 +38,7 @@ public class OrdenDePago {
         this.totalBrutoPagado = calcularTotalBrutoPagado();
     }
 
-    /**
-     * Calcula los totales de la OP siguiendo el Diagrama de Secuencia "Generación de OP":
-     * obtiene el bruto pagado, recorre cada impuesto del sistema acumulando su retención
-     * (que puede ser 0 si no corresponde) y obtiene el neto = bruto - total retenido.
-     */
+    /** Calcula bruto, retenciones por impuesto y neto = bruto - retenido. */
     public float calcularTotales(List<Impuesto> listaImpuestos) {
         this.totalBrutoPagado = calcularTotalBrutoPagado();
         this.totalRetenido = 0;

@@ -43,7 +43,7 @@ public class OrdenDeCompra {
         sumarBruto(detalle.getPrecioTotal());
     }
 
-    /** Recalcula el total bruto sumando el subtotal de cada línea (loop del diagrama de secuencia). */
+    /** Recalcula el total bruto sumando el subtotal de cada línea. */
     public double recalcularTotalBruto() {
         this.totalBruto = 0;
         for (DetalleItemOC detalle : detalleItems) {

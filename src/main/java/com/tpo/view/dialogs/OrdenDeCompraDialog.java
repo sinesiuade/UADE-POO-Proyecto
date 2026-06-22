@@ -25,11 +25,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-/**
- * Diálogo de creación/edición de Orden de Compra.
- * El estado (EMITIDA / PENDIENTE_APROBACION) NO se elige a mano: lo calcula el controlador
- * según la regla de límite de crédito del proveedor (Diagrama de Secuencia "Creación de OC").
- */
+/** Diálogo de Orden de Compra (el estado lo calcula el controlador por límite de crédito). */
 public class OrdenDeCompraDialog extends JDialog {
 
     private final JTextField txtNumero;
@@ -47,7 +43,7 @@ public class OrdenDeCompraDialog extends JDialog {
         this(parent, null, -1);
     }
 
-    /** Modo edición: editIndex es la posición en la lista del controller */
+    /** Modo edición */
     public OrdenDeCompraDialog(Frame parent, OrdenDeCompraDTO existing, int editIndex) {
         super(parent, existing == null ? "Nueva Orden de Compra" : "Editar Orden de Compra", true);
         this.editIndex = editIndex;

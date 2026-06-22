@@ -9,11 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Controlador Singleton de Impuestos. Mantiene la lista de impuestos vigentes del sistema,
- * que el flujo de Generación de Orden de Pago recorre para calcular las retenciones.
- * Persiste en {@code data/impuestos.json}.
- */
+/** Controlador Singleton de Impuestos. */
 public class ImpuestoController {
 
     private static final String ARCHIVO = "impuestos.json";
@@ -23,7 +19,7 @@ public class ImpuestoController {
     private ImpuestoController() {
         impuestos = JsonStore.load(ARCHIVO, new TypeToken<List<Impuesto>>() {}.getType());
         if (impuestos.isEmpty()) {
-            // Retenciones por defecto si no hay datos persistidos
+            // Retenciones por defecto
             impuestos.add(new Impuesto(TipoImpuesto.IVA, 21.0));
             impuestos.add(new Impuesto(TipoImpuesto.GANANCIAS, 6.0));
             impuestos.add(new Impuesto(TipoImpuesto.IIBB, 3.0));
