@@ -13,8 +13,21 @@ import java.util.Date;
 @AllArgsConstructor
 public class CertificadoDeExclusion {
 
-    private Impuesto impuesto;
+    private TipoImpuesto tipoImpuesto;
     private Date fechaDesde;
     private Date fechaHasta;
     private int numeroCertificado;
+
+    /** El certificado excluye al impuesto indicado. */
+    public boolean aplicaA(TipoImpuesto tipo) {
+        return this.tipoImpuesto == tipo;
+    }
+
+    /** Vigente si la fecha está dentro de [desde, hasta]. */
+    public boolean estaVigente(Date fecha) {
+        if (fechaDesde == null || fechaHasta == null || fecha == null) {
+            return false;
+        }
+        return !fecha.before(fechaDesde) && !fecha.after(fechaHasta);
+    }
 }

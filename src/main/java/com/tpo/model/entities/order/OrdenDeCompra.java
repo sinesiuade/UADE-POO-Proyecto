@@ -38,8 +38,18 @@ public class OrdenDeCompra {
     }
 
     public void agregarItem(Item item, int cantidad, double precioAcordado) {
-        detalleItems.add(new DetalleItemOC(item, cantidad, precioAcordado));
-        sumarBruto(cantidad * precioAcordado);
+        DetalleItemOC detalle = new DetalleItemOC(item, cantidad, precioAcordado);
+        detalleItems.add(detalle);
+        sumarBruto(detalle.getPrecioTotal());
+    }
+
+    /** Recalcula el total bruto sumando el subtotal de cada línea. */
+    public double recalcularTotalBruto() {
+        this.totalBruto = 0;
+        for (DetalleItemOC detalle : detalleItems) {
+            sumarBruto(detalle.getPrecioTotal());
+        }
+        return totalBruto;
     }
 
     public void confirmarOrdenDeCompra() {

@@ -1,4 +1,7 @@
 package com.tpo.model.entities.tax;
 
-public abstract class TipoImpuesto {
+public enum TipoImpuesto {
+    IVA,
+    GANANCIAS,
+    IIBB
 }

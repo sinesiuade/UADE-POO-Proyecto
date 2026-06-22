@@ -1,0 +1,16 @@
+[
+  {
+    "proveedor": "Insumos Médicos del Litoral SRL",
+    "fecha": 1781319600000,
+    "numero": 5001,
+    "importe": 12000.0,
+    "tipo": "Nota de Crédito"
+  },
+  {
+    "proveedor": "Farmacéutica del Sur SA",
+    "fecha": 1781492400000,
+    "numero": 7001,
+    "importe": 8500.0,
+    "tipo": "Nota de Débito"
+  }
+]

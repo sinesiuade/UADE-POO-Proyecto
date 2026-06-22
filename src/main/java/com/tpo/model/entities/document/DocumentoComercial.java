@@ -6,7 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -18,7 +20,9 @@ public abstract class DocumentoComercial {
     private Date fechaEmision;
     private Proveedor proveedor;
     private EstadoCancelacionDocumentoComercial estadoCancelacion;
-    private DetalleItemDocComercial detalleItemDocComercial;
+    private List<DetalleItemDocComercial> detalleItems = new ArrayList<>();
+    /** Documento "Observado" (diferencia de precios con la OC). */
+    private boolean observada;
 
     protected DocumentoComercial(int numero, float importeTotal, Date fechaEmision,
                                  Proveedor proveedor, EstadoCancelacionDocumentoComercial estadoCancelacion) {
@@ -29,6 +33,26 @@ public abstract class DocumentoComercial {
         this.estadoCancelacion = estadoCancelacion;
     }
 
-    public void checkearRubro() {
+    public void agregarDetalle(DetalleItemDocComercial detalle) {
+        detalleItems.add(detalle);
+        recalcularImporteTotal();
+    }
+
+    public float recalcularImporteTotal() {
+        double total = detalleItems.stream()
+                .mapToDouble(d -> d.getCantidad() * d.getPrecio())
+                .sum();
+        this.importeTotal = (float) total;
+        return importeTotal;
+    }
+
+    /** Total bruto del documento (suma de los subtotales de sus detalles). */
+    public float getTotalBruto() {
+        return recalcularImporteTotal();
+    }
+
+    /** Impacto en la cuenta corriente; por defecto suma deuda (la Nota de Crédito lo redefine). */
+    public double getImpactoCuentaCorriente() {
+        return importeTotal;
     }
 }

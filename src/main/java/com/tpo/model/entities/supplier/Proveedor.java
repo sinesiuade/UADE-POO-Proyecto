@@ -1,6 +1,8 @@
 package com.tpo.model.entities.supplier;
 
 import com.tpo.model.Enums.CondicionImpositiva;
+import com.tpo.model.entities.catalog.Item;
+import com.tpo.model.entities.catalog.ItemProveedor;
 import com.tpo.model.entities.catalog.Rubro;
 import com.tpo.model.entities.tax.CertificadoDeExclusion;
 import lombok.Getter;
@@ -26,8 +28,10 @@ public class Proveedor {
     private float nroInscripcionFiscal;
     private Date fechaInicioAct;
     private int limiteDeudaAutorizado;
+    private double deudaActual;
     private List<CertificadoDeExclusion> certificadosDeExclusion = new ArrayList<>();
     private List<Rubro> rubros = new ArrayList<>();
+    private List<ItemProveedor> itemsProvistos = new ArrayList<>();
 
     public Proveedor(float cuit, String razonSocial, String nombreComercial, String domicilio,
                      float telefono, String email, CondicionImpositiva condicionImpositiva,
@@ -44,18 +48,24 @@ public class Proveedor {
         this.limiteDeudaAutorizado = limiteDeudaAutorizado;
     }
 
-    public List<CertificadoDeExclusion> obtenerCertificadosDeExclusionVigentes() {
-        return new ArrayList<>(certificadosDeExclusion);
+    /** Certificados de exclusión del proveedor. */
+    public List<CertificadoDeExclusion> getListaCertificadosDeExclusion() {
+        return certificadosDeExclusion;
     }
 
-    public double getDeudaActual() {
-        return 0.0;
+    /** Habilitado para operar en el rubro. */
+    public boolean perteneceARubro(Rubro rubro) {
+        if (rubro == null) {
+            return false;
+        }
+        return rubros.stream().anyMatch(r -> r.getNombre() != null && r.getNombre().equals(rubro.getNombre()));
     }
 
-    public void crearOrdenDeCompra() {
-    }
-
-    public List<Rubro> getListaRubros() {
-        return rubros;
+    /** Autorizado a suministrar el ítem (relación N:M). */
+    public boolean proveeItem(Item item) {
+        if (item == null) {
+            return false;
+        }
+        return itemsProvistos.stream().anyMatch(ip -> ip.getItemBase() == item);
     }
 }

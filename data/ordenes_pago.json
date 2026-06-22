@@ -1,0 +1,28 @@
+[
+  {
+    "proveedor": "Farmacéutica del Sur SA",
+    "condicion": "RESPONSABLE_INSCRIPTO",
+    "fecha": 1781751600000,
+    "bruto": 84000.0,
+    "retenido": 25200.0,
+    "neto": 58800.0,
+    "medioDePago": "Transferencia",
+    "retenciones": {
+      "IVA": 17640.0,
+      "GANANCIAS": 5040.0,
+      "IIBB": 2520.0
+    }
+  },
+  {
+    "proveedor": "Servicios Generales del Norte SA",
+    "condicion": "MONOTRIBUTISTA",
+    "fecha": 1781751600000,
+    "bruto": 30000.0,
+    "retenido": 900.0,
+    "neto": 29100.0,
+    "medioDePago": "Efectivo",
+    "retenciones": {
+      "IIBB": 900.0
+    }
+  }
+]

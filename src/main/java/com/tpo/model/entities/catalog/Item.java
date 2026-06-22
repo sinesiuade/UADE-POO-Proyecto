@@ -1,11 +1,16 @@
 package com.tpo.model.entities.catalog;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public abstract class Item {
 
-    int codigo;
-    String descripcion;
-    Rubro rubro;
-    String unidadMedida;
-    double precioUnitario;
-    float porcentajeIva;
+    private int codigo;
+    private String descripcion;
+    private Rubro rubro;
+    private String unidadMedida;
+    private double precioUnitario;
+    private float porcentajeIva;
 }
