@@ -6,7 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -18,7 +20,12 @@ public abstract class DocumentoComercial {
     private Date fechaEmision;
     private Proveedor proveedor;
     private EstadoCancelacionDocumentoComercial estadoCancelacion;
-    private DetalleItemDocComercial detalleItemDocComercial;
+    private List<DetalleItemDocComercial> detalleItems = new ArrayList<>();
+    /**
+     * Marca el documento como "Observado" (ver consigna: diferencia de precios con la OC).
+     * Es una dimensión distinta del estado de cancelación, por eso se modela aparte.
+     */
+    private boolean observada;
 
     protected DocumentoComercial(int numero, float importeTotal, Date fechaEmision,
                                  Proveedor proveedor, EstadoCancelacionDocumentoComercial estadoCancelacion) {
@@ -29,6 +36,21 @@ public abstract class DocumentoComercial {
         this.estadoCancelacion = estadoCancelacion;
     }
 
-    public void checkearRubro() {
+    public void agregarDetalle(DetalleItemDocComercial detalle) {
+        detalleItems.add(detalle);
+        recalcularImporteTotal();
+    }
+
+    public float recalcularImporteTotal() {
+        double total = detalleItems.stream()
+                .mapToDouble(d -> d.getCantidad() * d.getPrecio())
+                .sum();
+        this.importeTotal = (float) total;
+        return importeTotal;
+    }
+
+    /** Total bruto del documento (suma de los subtotales de sus detalles). */
+    public float getTotalBruto() {
+        return recalcularImporteTotal();
     }
 }

@@ -1,0 +1,50 @@
+[
+  {
+    "numero": 1001,
+    "fecha": 1778382000000,
+    "proveedor": "Farmacéutica del Sur SA",
+    "limite": 500000,
+    "deuda": 120000.0,
+    "totalBruto": 84000.0,
+    "estado": "EMITIDA",
+    "lineas": [
+      {
+        "descripcion": "Guantes de nitrilo (caja x100)",
+        "cantidad": 120,
+        "precioAcordado": 700.0
+      }
+    ]
+  },
+  {
+    "numero": 1002,
+    "fecha": 1779418800000,
+    "proveedor": "Insumos Médicos del Litoral SRL",
+    "limite": 300000,
+    "deuda": 250000.0,
+    "totalBruto": 90000.0,
+    "estado": "PENDIENTE_APROBACION",
+    "lineas": [
+      {
+        "descripcion": "Jeringas descartables 10ml",
+        "cantidad": 1800,
+        "precioAcordado": 50.0
+      }
+    ]
+  },
+  {
+    "numero": 1003,
+    "fecha": 1780455600000,
+    "proveedor": "Farmacéutica del Sur SA",
+    "limite": 500000,
+    "deuda": 120000.0,
+    "totalBruto": 45000.0,
+    "estado": "EMITIDA",
+    "lineas": [
+      {
+        "descripcion": "Guantes de nitrilo (caja x100)",
+        "cantidad": 60,
+        "precioAcordado": 750.0
+      }
+    ]
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "proveedor": "Farmacéutica del Sur SA",
+    "fecha": 1780455600000,
+    "importeTotal": 84000.0,
+    "cantidadDetalles": 1,
+    "observada": false,
+    "montoPagado": 84000.0
+  },
+  {
+    "proveedor": "Insumos Médicos del Litoral SRL",
+    "fecha": 1781233200000,
+    "importeTotal": 99000.0,
+    "cantidadDetalles": 1,
+    "observada": true,
+    "montoPagado": 40000.0
+  },
+  {
+    "proveedor": "Farmacéutica del Sur SA",
+    "fecha": 1781751600000,
+    "importeTotal": 45000.0,
+    "cantidadDetalles": 1,
+    "observada": false,
+    "montoPagado": 0.0
+  }
+]

@@ -21,11 +21,24 @@ Proyecto base con separación de responsabilidades en tres capas: modelo (datos 
 
 ## Arquitectura MVC
 
+El proyecto sigue **únicamente** los patrones **MVC** y **Singleton** (un controlador Singleton
+por módulo). No hay capa de servicios ni de repositorios: las reglas de negocio viven en las
+entidades del modelo y los controladores las coordinan.
+
 | Capa | Paquete | Responsabilidad |
 |------|---------|-----------------|
-| **Model** | `model` | Entidades, DTOs, repositorios y reglas de negocio |
+| **Model** | `model` | Entidades (con las reglas de negocio), DTOs y enums |
 | **View** | `view` | Interfaz gráfica (`JFrame`, `JPanel`, `JDialog`) |
-| **Controller** | `controller` | Manejo de eventos y comunicación entre vista y modelo |
+| **Controller** | `controller` | Controladores Singleton: coordinan vista ↔ modelo y aplican los flujos |
+
+### Controladores Singleton
+
+| Controlador | Diagrama de Secuencia implementado |
+|-------------|-------------------------------------|
+| `OrdenDeCompraController` | Creación de OC (validación de límite de crédito → estado calculado) |
+| `OrdenDePagoController` | Generación de OP (cálculo de retenciones por impuesto) |
+| `FacturaController` | Generación de Factura (validación de OC, congruencia rubro/ítem, control de precios) |
+| `ImpuestoController` | Catálogo de impuestos del sistema usado por la OP |
 
 ### Estructura del proyecto
 
@@ -33,15 +46,14 @@ Proyecto base con separación de responsabilidades en tres capas: modelo (datos 
 src/main/java/com/tpo/
 ├── Main.java
 ├── model/
-│   ├── entities/      # Entidades del dominio
-│   ├── dto/           # Objetos de transferencia (vista ↔ servicio, JSON)
-│   ├── repositories/  # Acceso y persistencia de datos
-│   └── services/      # Lógica de negocio
+│   ├── entities/      # Entidades del dominio (reglas de negocio)
+│   ├── dto/           # Objetos de transferencia (vista ↔ controlador)
+│   └── Enums/         # Enumerados del dominio
 ├── view/
 │   ├── frames/        # Ventanas principales (JFrame)
 │   ├── panels/        # Paneles reutilizables (JPanel)
 │   └── dialogs/       # Diálogos (JDialog)
-├── controller/
+├── controller/        # Controladores Singleton (uno por módulo)
 └── util/              # Constantes y utilidades (AppConstants, Validator)
 
 resources/
@@ -70,9 +82,11 @@ src/test/java/         # Tests con JUnit 5
 | **Lombok** | 1.18.46 | Reducir código repetitivo en entidades (`@Getter`, `@Setter`, etc.) |
 | **JUnit 5** | 5.10.2 | Tests unitarios en `src/test/java` |
 
-## Persistencia (JSON)
+## Persistencia
 
-Los datos se guardan en archivos JSON dentro de la carpeta `data/` en la raíz del proyecto (no se usa base de datos).
+El estado se mantiene **en memoria** dentro de cada controlador Singleton durante la ejecución
+(no se usa base de datos ni archivos). Gson/Logback quedan disponibles como dependencias pero la
+persistencia en disco no es parte de esta entrega.
 
 ## Cómo ejecutar
 

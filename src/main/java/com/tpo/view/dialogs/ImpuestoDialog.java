@@ -1,5 +1,9 @@
 package com.tpo.view.dialogs;
 
+import com.tpo.controller.ImpuestoController;
+import com.tpo.model.entities.tax.Impuesto;
+import com.tpo.model.entities.tax.TipoImpuesto;
+
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -19,13 +23,27 @@ import java.awt.Insets;
 
 public class ImpuestoDialog extends JDialog {
 
+    private final JComboBox<TipoImpuesto> comboTipo;
+    private final JTextField txtPorcentaje;
+    private final ImpuestoController controller;
+    private final int editIndex;
+
+    /** Modo creación */
     public ImpuestoDialog(Frame parent) {
-        super(parent, "Agregar Impuesto", true);
+        this(parent, null, -1);
+    }
+
+    /** Modo edición: editIndex es la posición en la lista del controller */
+    public ImpuestoDialog(Frame parent, Impuesto existing, int editIndex) {
+        super(parent, existing == null ? "Agregar Impuesto" : "Editar Impuesto", true);
+        this.editIndex = editIndex;
         setSize(390, 240);
         setLocationRelativeTo(parent);
         setLayout(new BorderLayout(10, 10));
 
-        JLabel header = new JLabel("Nuevo Impuesto", SwingConstants.CENTER);
+        controller = ImpuestoController.getInstance();
+
+        JLabel header = new JLabel(existing == null ? "Nuevo Impuesto" : "Editar Impuesto", SwingConstants.CENTER);
         header.setFont(header.getFont().deriveFont(Font.BOLD, 18f));
         header.setBorder(BorderFactory.createEmptyBorder(15, 10, 5, 10));
         add(header, BorderLayout.NORTH);
@@ -36,17 +54,23 @@ public class ImpuestoDialog extends JDialog {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        String[] tiposImpuesto = {"IVA", "Ganancias", "IIBB"};
+        comboTipo = new JComboBox<>(TipoImpuesto.values());
+        txtPorcentaje = new JTextField(20);
+
+        if (existing != null) {
+            comboTipo.setSelectedItem(existing.getNombre());
+            txtPorcentaje.setText(String.valueOf(existing.getPorcentaje()));
+        }
 
         gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0.4;
         form.add(new JLabel("Tipo de Impuesto:"), gbc);
         gbc.gridx = 1; gbc.weightx = 0.6;
-        form.add(new JComboBox<>(tiposImpuesto), gbc);
+        form.add(comboTipo, gbc);
 
         gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0.4;
         form.add(new JLabel("Porcentaje (%):"), gbc);
         gbc.gridx = 1; gbc.weightx = 0.6;
-        form.add(new JTextField(20), gbc);
+        form.add(txtPorcentaje, gbc);
 
         add(form, BorderLayout.CENTER);
 
@@ -54,12 +78,27 @@ public class ImpuestoDialog extends JDialog {
         JButton btnCancelar = new JButton("Cancelar");
         JButton btnGuardar = new JButton("Guardar");
         btnCancelar.addActionListener(e -> dispose());
-        btnGuardar.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "Impuesto guardado correctamente.");
-            dispose();
-        });
+        btnGuardar.addActionListener(e -> guardar());
         buttons.add(btnGuardar);
         buttons.add(btnCancelar);
         add(buttons, BorderLayout.SOUTH);
+    }
+
+    private void guardar() {
+        double porcentaje;
+        try {
+            porcentaje = Double.parseDouble(txtPorcentaje.getText().trim());
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "El porcentaje debe ser un valor numérico.",
+                    "Error de validación", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        Impuesto impuesto = new Impuesto((TipoImpuesto) comboTipo.getSelectedItem(), porcentaje);
+        if (editIndex >= 0) {
+            controller.editarImpuesto(editIndex, impuesto);
+        } else {
+            controller.agregarImpuesto(impuesto);
+        }
+        dispose();
     }
 }

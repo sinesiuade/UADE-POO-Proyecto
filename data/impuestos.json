@@ -1,0 +1,14 @@
+[
+  {
+    "nombre": "IVA",
+    "porcentaje": 21.0
+  },
+  {
+    "nombre": "GANANCIAS",
+    "porcentaje": 6.0
+  },
+  {
+    "nombre": "IIBB",
+    "porcentaje": 3.0
+  }
+]
