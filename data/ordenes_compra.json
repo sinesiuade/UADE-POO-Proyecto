@@ -10,6 +10,7 @@
     "lineas": [
       {
         "descripcion": "Guantes de nitrilo (caja x100)",
+        "rubro": "Insumos descartables y estériles",
         "cantidad": 120,
         "precioAcordado": 700.0
       }
@@ -26,6 +27,7 @@
     "lineas": [
       {
         "descripcion": "Jeringas descartables 10ml",
+        "rubro": "Insumos descartables y estériles",
         "cantidad": 1800,
         "precioAcordado": 50.0
       }
@@ -41,7 +43,8 @@
     "estado": "EMITIDA",
     "lineas": [
       {
-        "descripcion": "Guantes de nitrilo (caja x100)",
+        "descripcion": "Equipo de rayos X portátil",
+        "rubro": "Tecnología médica y equipamiento",
         "cantidad": 60,
         "precioAcordado": 750.0
       }

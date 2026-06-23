@@ -1,6 +1,8 @@
 package com.tpo.view.dialogs;
 
+import com.tpo.controller.ProveedorController;
 import com.tpo.model.Enums.CondicionImpositiva;
+import com.tpo.model.entities.supplier.Proveedor;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -20,18 +22,55 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 
+/** Diálogo de alta/edición de Proveedor. */
 public class ProveedorDialog extends JDialog {
 
+    private final JTextField txtCuit;
+    private final JTextField txtRazonSocial;
+    private final JTextField txtNombreComercial;
+    private final JTextField txtDomicilio;
+    private final JTextField txtTelefono;
+    private final JTextField txtEmail;
+    private final JComboBox<CondicionImpositiva> comboCondicion;
+
+    private final ProveedorController controller;
+    private final int editIndex;
+
     public ProveedorDialog(Frame parent) {
-        super(parent, "Agregar Proveedor", true);
+        this(parent, null, -1);
+    }
+
+    public ProveedorDialog(Frame parent, Proveedor existing, int editIndex) {
+        super(parent, existing == null ? "Nuevo Proveedor" : "Editar Proveedor", true);
+        this.editIndex = editIndex;
         setSize(460, 420);
         setLocationRelativeTo(parent);
         setLayout(new BorderLayout(10, 10));
 
-        JLabel header = new JLabel("Nuevo Proveedor", SwingConstants.CENTER);
+        controller = ProveedorController.getInstance();
+
+        JLabel header = new JLabel(existing == null ? "Nuevo Proveedor" : "Editar Proveedor", SwingConstants.CENTER);
         header.setFont(header.getFont().deriveFont(Font.BOLD, 18f));
         header.setBorder(BorderFactory.createEmptyBorder(15, 10, 5, 10));
         add(header, BorderLayout.NORTH);
+
+        txtCuit = new JTextField(20);
+        txtRazonSocial = new JTextField(20);
+        txtNombreComercial = new JTextField(20);
+        txtDomicilio = new JTextField(20);
+        txtTelefono = new JTextField(20);
+        txtEmail = new JTextField(20);
+        comboCondicion = new JComboBox<>(CondicionImpositiva.values());
+
+        if (existing != null) {
+            if (existing.getCuit() > 0) txtCuit.setText(String.valueOf(existing.getCuit()));
+            txtRazonSocial.setText(existing.getRazonSocial());
+            txtNombreComercial.setText(existing.getNombreComercial());
+            txtDomicilio.setText(existing.getDomicilio());
+            if (existing.getTelefono() > 0) txtTelefono.setText(String.valueOf(existing.getTelefono()));
+            txtEmail.setText(existing.getEmail());
+            if (existing.getCondicionImpositiva() != null) comboCondicion.setSelectedItem(existing.getCondicionImpositiva());
+        }
 
         JPanel form = new JPanel(new GridBagLayout());
         form.setBorder(BorderFactory.createEmptyBorder(5, 20, 5, 20));
@@ -40,23 +79,12 @@ public class ProveedorDialog extends JDialog {
         gbc.insets = new Insets(5, 5, 5, 5);
 
         String[] labels = {"CUIT:", "Razón Social:", "Nombre Comercial:", "Domicilio:", "Teléfono:", "Email:", "Condición Impositiva:"};
-        JComponent[] fields = {
-            new JTextField(20),
-            new JTextField(20),
-            new JTextField(20),
-            new JTextField(20),
-            new JTextField(20),
-            new JTextField(20),
-            new JComboBox<>(CondicionImpositiva.values())
-        };
+        JComponent[] fields = {txtCuit, txtRazonSocial, txtNombreComercial, txtDomicilio, txtTelefono, txtEmail, comboCondicion};
 
         for (int i = 0; i < labels.length; i++) {
-            gbc.gridx = 0;
-            gbc.gridy = i;
-            gbc.weightx = 0.35;
+            gbc.gridx = 0; gbc.gridy = i; gbc.weightx = 0.35;
             form.add(new JLabel(labels[i]), gbc);
-            gbc.gridx = 1;
-            gbc.weightx = 0.65;
+            gbc.gridx = 1; gbc.weightx = 0.65;
             form.add(fields[i], gbc);
         }
 
@@ -66,12 +94,53 @@ public class ProveedorDialog extends JDialog {
         JButton btnCancelar = new JButton("Cancelar");
         JButton btnGuardar = new JButton("Guardar");
         btnCancelar.addActionListener(e -> dispose());
-        btnGuardar.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "Proveedor guardado correctamente.");
-            dispose();
-        });
+        btnGuardar.addActionListener(e -> guardar());
         buttons.add(btnGuardar);
         buttons.add(btnCancelar);
         add(buttons, BorderLayout.SOUTH);
+    }
+
+    private void guardar() {
+        String razonSocial = txtRazonSocial.getText().trim();
+        if (razonSocial.isEmpty()) {
+            error("La razón social es obligatoria.");
+            return;
+        }
+        long cuit = 0;
+        long telefono = 0;
+        try {
+            if (!txtCuit.getText().trim().isEmpty()) cuit = Long.parseLong(txtCuit.getText().trim());
+            if (!txtTelefono.getText().trim().isEmpty()) telefono = Long.parseLong(txtTelefono.getText().trim());
+        } catch (NumberFormatException e) {
+            error("CUIT y teléfono deben ser numéricos (sin guiones ni puntos).");
+            return;
+        }
+
+        if (controller.existeProveedor(cuit, razonSocial, editIndex)) {
+            error(cuit > 0
+                    ? "Ya existe un proveedor con el CUIT " + cuit + "."
+                    : "Ya existe un proveedor con esa razón social.");
+            return;
+        }
+
+        Proveedor p = new Proveedor();
+        p.setCuit(cuit);
+        p.setRazonSocial(razonSocial);
+        p.setNombreComercial(txtNombreComercial.getText().trim());
+        p.setDomicilio(txtDomicilio.getText().trim());
+        p.setTelefono(telefono);
+        p.setEmail(txtEmail.getText().trim());
+        p.setCondicionImpositiva((CondicionImpositiva) comboCondicion.getSelectedItem());
+
+        if (editIndex >= 0) {
+            controller.editarProveedor(editIndex, p);
+        } else {
+            controller.agregarProveedor(p);
+        }
+        dispose();
+    }
+
+    private void error(String mensaje) {
+        JOptionPane.showMessageDialog(this, mensaje, "Error de validación", JOptionPane.ERROR_MESSAGE);
     }
 }

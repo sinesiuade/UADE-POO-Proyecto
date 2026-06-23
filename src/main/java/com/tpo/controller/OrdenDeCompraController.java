@@ -4,6 +4,7 @@ import com.google.gson.reflect.TypeToken;
 import com.tpo.model.Enums.EstadoOrdenDeCompra;
 import com.tpo.model.dto.OrdenDeCompraDTO;
 import com.tpo.model.entities.catalog.Producto;
+import com.tpo.model.entities.catalog.Rubro;
 import com.tpo.model.entities.order.DetalleItemOC;
 import com.tpo.model.entities.order.OrdenDeCompra;
 import com.tpo.model.entities.supplier.Proveedor;
@@ -93,6 +94,7 @@ public class OrdenDeCompraController {
             for (DetalleItemOC d : dto.getDetalleItems()) {
                 OcRecord.Linea linea = new OcRecord.Linea();
                 linea.descripcion = d.getItem() != null ? d.getItem().getDescripcion() : null;
+                linea.rubro = d.getItem() != null && d.getItem().getRubro() != null ? d.getItem().getRubro().getNombre() : null;
                 linea.cantidad = d.getCantidad();
                 linea.precioAcordado = d.getPrecioAcordado();
                 r.lineas.add(linea);
@@ -115,6 +117,9 @@ public class OrdenDeCompraController {
         for (OcRecord.Linea linea : r.lineas) {
             Producto item = new Producto();
             item.setDescripcion(linea.descripcion);
+            if (linea.rubro != null) {
+                item.setRubro(new Rubro(linea.rubro));
+            }
             detalles.add(new DetalleItemOC(item, linea.cantidad, linea.precioAcordado));
         }
         dto.setDetalleItems(detalles);

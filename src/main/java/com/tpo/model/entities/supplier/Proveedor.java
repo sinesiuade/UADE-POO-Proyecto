@@ -18,14 +18,14 @@ import java.util.List;
 @NoArgsConstructor
 public class Proveedor {
 
-    private float cuit;
+    private long cuit;
     private String razonSocial;
     private String nombreComercial;
     private String domicilio;
-    private float telefono;
+    private long telefono;
     private String email;
     private CondicionImpositiva condicionImpositiva;
-    private float nroInscripcionFiscal;
+    private long nroInscripcionFiscal;
     private Date fechaInicioAct;
     private int limiteDeudaAutorizado;
     private double deudaActual;
@@ -33,9 +33,9 @@ public class Proveedor {
     private List<Rubro> rubros = new ArrayList<>();
     private List<ItemProveedor> itemsProvistos = new ArrayList<>();
 
-    public Proveedor(float cuit, String razonSocial, String nombreComercial, String domicilio,
-                     float telefono, String email, CondicionImpositiva condicionImpositiva,
-                     float nroInscripcionFiscal, Date fechaInicioAct, int limiteDeudaAutorizado) {
+    public Proveedor(long cuit, String razonSocial, String nombreComercial, String domicilio,
+                     long telefono, String email, CondicionImpositiva condicionImpositiva,
+                     long nroInscripcionFiscal, Date fechaInicioAct, int limiteDeudaAutorizado) {
         this.cuit = cuit;
         this.razonSocial = razonSocial;
         this.nombreComercial = nombreComercial;

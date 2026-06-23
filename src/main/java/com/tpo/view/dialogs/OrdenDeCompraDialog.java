@@ -3,6 +3,8 @@ package com.tpo.view.dialogs;
 import com.tpo.controller.OrdenDeCompraController;
 import com.tpo.model.dto.OrdenDeCompraDTO;
 import com.tpo.model.entities.catalog.Producto;
+import com.tpo.model.entities.catalog.Rubro;
+import com.tpo.model.entities.order.DetalleItemOC;
 import com.tpo.model.entities.order.OrdenDeCompra;
 import com.tpo.model.entities.supplier.Proveedor;
 
@@ -31,6 +33,7 @@ public class OrdenDeCompraDialog extends JDialog {
     private final JTextField txtNumero;
     private final JTextField txtFecha;
     private final JTextField txtProveedor;
+    private final JTextField txtRubro;
     private final JTextField txtLimite;
     private final JTextField txtDeuda;
     private final JTextField txtMonto;
@@ -47,7 +50,7 @@ public class OrdenDeCompraDialog extends JDialog {
     public OrdenDeCompraDialog(Frame parent, OrdenDeCompraDTO existing, int editIndex) {
         super(parent, existing == null ? "Nueva Orden de Compra" : "Editar Orden de Compra", true);
         this.editIndex = editIndex;
-        setSize(440, 380);
+        setSize(440, 420);
         setLocationRelativeTo(parent);
         setLayout(new BorderLayout(10, 10));
 
@@ -61,6 +64,7 @@ public class OrdenDeCompraDialog extends JDialog {
         txtNumero = new JTextField(20);
         txtFecha = new JTextField(20);
         txtProveedor = new JTextField(20);
+        txtRubro = new JTextField(20);
         txtLimite = new JTextField(20);
         txtDeuda = new JTextField(20);
         txtMonto = new JTextField(20);
@@ -74,6 +78,12 @@ public class OrdenDeCompraDialog extends JDialog {
                 txtLimite.setText(String.valueOf(existing.getProveedor().getLimiteDeudaAutorizado()));
                 txtDeuda.setText(String.valueOf(existing.getProveedor().getDeudaActual()));
             }
+            if (existing.getDetalleItems() != null && !existing.getDetalleItems().isEmpty()) {
+                DetalleItemOC primera = existing.getDetalleItems().get(0);
+                if (primera.getItem() != null && primera.getItem().getRubro() != null) {
+                    txtRubro.setText(primera.getItem().getRubro().getNombre());
+                }
+            }
             txtMonto.setText(String.valueOf(existing.getTotalBruto()));
         }
 
@@ -83,9 +93,9 @@ public class OrdenDeCompraDialog extends JDialog {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        String[] labels = {"Número:", "Fecha (dd/MM/yyyy):", "Proveedor:",
+        String[] labels = {"Número:", "Fecha (dd/MM/yyyy):", "Proveedor:", "Rubro:",
                 "Límite autorizado:", "Deuda actual:", "Monto de la orden:"};
-        JTextField[] fields = {txtNumero, txtFecha, txtProveedor, txtLimite, txtDeuda, txtMonto};
+        JTextField[] fields = {txtNumero, txtFecha, txtProveedor, txtRubro, txtLimite, txtDeuda, txtMonto};
 
         for (int i = 0; i < labels.length; i++) {
             gbc.gridx = 0; gbc.gridy = i; gbc.weightx = 0.45;
@@ -148,6 +158,10 @@ public class OrdenDeCompraDialog extends JDialog {
         OrdenDeCompra oc = new OrdenDeCompra(numero, fecha, proveedor, null);
         Producto item = new Producto();
         item.setDescripcion("Ítems de la orden");
+        String rubroStr = txtRubro.getText().trim();
+        if (!rubroStr.isEmpty()) {
+            item.setRubro(new Rubro(rubroStr));
+        }
         oc.agregarItem(item, 1, monto);
 
         OrdenDeCompraDTO dto = editIndex >= 0
