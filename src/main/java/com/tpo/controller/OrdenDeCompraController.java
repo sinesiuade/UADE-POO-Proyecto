@@ -59,6 +59,20 @@ public class OrdenDeCompraController {
         return Collections.unmodifiableList(ordenes);
     }
 
+    /** Aprobación de supervisor: pasa una OC en Pendiente de Aprobación a Emitida. */
+    public OrdenDeCompraDTO aprobarOrdenDeCompra(int index) {
+        if (index < 0 || index >= ordenes.size()) {
+            throw new IllegalArgumentException("Orden de compra inexistente.");
+        }
+        OrdenDeCompraDTO dto = ordenes.get(index);
+        if (dto.getEstado() != EstadoOrdenDeCompra.PENDIENTE_APROBACION) {
+            throw new IllegalStateException("Solo se pueden aprobar órdenes en estado Pendiente de Aprobación.");
+        }
+        dto.setEstado(EstadoOrdenDeCompra.EMITIDA);
+        persistir();
+        return dto;
+    }
+
     /** Recalcula el bruto, define el estado según el límite y mapea a DTO. */
     private OrdenDeCompraDTO validarYMapear(OrdenDeCompra oc) {
         oc.recalcularTotalBruto();

@@ -25,6 +25,7 @@ public class ImpuestoDialog extends JDialog {
 
     private final JComboBox<TipoImpuesto> comboTipo;
     private final JTextField txtPorcentaje;
+    private final JTextField txtMinimoNoImponible;
     private final ImpuestoController controller;
     private final int editIndex;
 
@@ -37,7 +38,7 @@ public class ImpuestoDialog extends JDialog {
     public ImpuestoDialog(Frame parent, Impuesto existing, int editIndex) {
         super(parent, existing == null ? "Agregar Impuesto" : "Editar Impuesto", true);
         this.editIndex = editIndex;
-        setSize(390, 240);
+        setSize(390, 290);
         setLocationRelativeTo(parent);
         setLayout(new BorderLayout(10, 10));
 
@@ -56,10 +57,12 @@ public class ImpuestoDialog extends JDialog {
 
         comboTipo = new JComboBox<>(TipoImpuesto.values());
         txtPorcentaje = new JTextField(20);
+        txtMinimoNoImponible = new JTextField(20);
 
         if (existing != null) {
             comboTipo.setSelectedItem(existing.getNombre());
             txtPorcentaje.setText(String.valueOf(existing.getPorcentaje()));
+            txtMinimoNoImponible.setText(String.valueOf(existing.getMinimoNoImponible()));
         }
 
         gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0.4;
@@ -71,6 +74,11 @@ public class ImpuestoDialog extends JDialog {
         form.add(new JLabel("Porcentaje (%):"), gbc);
         gbc.gridx = 1; gbc.weightx = 0.6;
         form.add(txtPorcentaje, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 2; gbc.weightx = 0.4;
+        form.add(new JLabel("Mínimo No Imponible:"), gbc);
+        gbc.gridx = 1; gbc.weightx = 0.6;
+        form.add(txtMinimoNoImponible, gbc);
 
         add(form, BorderLayout.CENTER);
 
@@ -86,14 +94,17 @@ public class ImpuestoDialog extends JDialog {
 
     private void guardar() {
         double porcentaje;
+        double minimoNoImponible;
         try {
             porcentaje = Double.parseDouble(txtPorcentaje.getText().trim());
+            String mni = txtMinimoNoImponible.getText().trim();
+            minimoNoImponible = mni.isEmpty() ? 0.0 : Double.parseDouble(mni);
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "El porcentaje debe ser un valor numérico.",
+            JOptionPane.showMessageDialog(this, "El porcentaje y el mínimo no imponible deben ser valores numéricos.",
                     "Error de validación", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        Impuesto impuesto = new Impuesto((TipoImpuesto) comboTipo.getSelectedItem(), porcentaje);
+        Impuesto impuesto = new Impuesto((TipoImpuesto) comboTipo.getSelectedItem(), porcentaje, minimoNoImponible);
         if (editIndex >= 0) {
             controller.editarImpuesto(editIndex, impuesto);
         } else {

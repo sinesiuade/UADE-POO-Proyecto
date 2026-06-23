@@ -1,17 +1,23 @@
 [
   {
-    "proveedor": "Farmacéutica del Sur SA",
+    "proveedor": "Insumos Médicos del Litoral SRL",
     "condicion": "RESPONSABLE_INSCRIPTO",
-    "fecha": 1781751600000,
-    "bruto": 84000.0,
-    "retenido": 25200.0,
-    "neto": 58800.0,
+    "fecha": 1782256534578,
+    "bruto": 5.0,
+    "retenido": 1.4999999,
+    "neto": 3.5,
     "medioDePago": "Transferencia",
     "retenciones": {
-      "IVA": 17640.0,
-      "GANANCIAS": 5040.0,
-      "IIBB": 2520.0
-    }
+      "IVA": 1.05,
+      "GANANCIAS": 0.3,
+      "IIBB": 0.15
+    },
+    "lineas": [
+      {
+        "documento": "Factura 12/06/2026 (imp. 99000,00)",
+        "montoAplicado": 5.0
+      }
+    ]
   },
   {
     "proveedor": "Servicios Generales del Norte SA",
@@ -23,6 +29,7 @@
     "medioDePago": "Efectivo",
     "retenciones": {
       "IIBB": 900.0
-    }
+    },
+    "lineas": []
   }
 ]

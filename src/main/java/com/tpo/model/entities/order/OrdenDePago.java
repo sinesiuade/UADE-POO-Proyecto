@@ -23,6 +23,8 @@ public class OrdenDePago {
     private Proveedor proveedor;
     private Date fechaEmision;
     private List<DocumentoComercial> documentosAsociados = new ArrayList<>();
+    /** Documentos asociados con el monto que se aplica a cada uno (cancelación total o parcial). */
+    private List<DetallePagoDocumento> detallePagos = new ArrayList<>();
     private float totalBrutoPagado;
     private float totalRetenido;
     private float totalNetoAPagar;
@@ -34,6 +36,19 @@ public class OrdenDePago {
     public OrdenDePago(Proveedor proveedor, List<DocumentoComercial> listaDocumentos) {
         this.proveedor = proveedor;
         this.documentosAsociados = listaDocumentos != null ? listaDocumentos : new ArrayList<>();
+        this.fechaEmision = new Date();
+        this.totalBrutoPagado = calcularTotalBrutoPagado();
+    }
+
+    /** Construye una OP a partir del detalle de montos aplicados por documento. */
+    public OrdenDePago(Proveedor proveedor, List<DetallePagoDocumento> detallePagos, boolean porDetalle) {
+        this.proveedor = proveedor;
+        this.detallePagos = detallePagos != null ? detallePagos : new ArrayList<>();
+        for (DetallePagoDocumento detalle : this.detallePagos) {
+            if (detalle.getDocumento() != null) {
+                this.documentosAsociados.add(detalle.getDocumento());
+            }
+        }
         this.fechaEmision = new Date();
         this.totalBrutoPagado = calcularTotalBrutoPagado();
     }
@@ -59,6 +74,12 @@ public class OrdenDePago {
     }
 
     public float calcularTotalBrutoPagado() {
+        // Si hay montos aplicados por documento, el bruto es su suma (permite cancelación parcial).
+        if (detallePagos != null && !detallePagos.isEmpty()) {
+            return (float) detallePagos.stream()
+                    .mapToDouble(DetallePagoDocumento::getMontoAplicado)
+                    .sum();
+        }
         return (float) documentosAsociados.stream()
                 .mapToDouble(DocumentoComercial::getImporteTotal)
                 .sum();

@@ -9,10 +9,10 @@
     "estado": "EMITIDA",
     "lineas": [
       {
-        "descripcion": "Guantes de nitrilo (caja x100)",
+        "descripcion": "Ítems de la orden",
         "rubro": "Insumos descartables y estériles",
-        "cantidad": 120,
-        "precioAcordado": 700.0
+        "cantidad": 1,
+        "precioAcordado": 84000.0
       }
     ]
   },
@@ -26,10 +26,10 @@
     "estado": "PENDIENTE_APROBACION",
     "lineas": [
       {
-        "descripcion": "Jeringas descartables 10ml",
+        "descripcion": "Ítems de la orden",
         "rubro": "Insumos descartables y estériles",
-        "cantidad": 1800,
-        "precioAcordado": 50.0
+        "cantidad": 1,
+        "precioAcordado": 90000.0
       }
     ]
   },
@@ -43,10 +43,10 @@
     "estado": "EMITIDA",
     "lineas": [
       {
-        "descripcion": "Equipo de rayos X portátil",
+        "descripcion": "Ítems de la orden",
         "rubro": "Tecnología médica y equipamiento",
-        "cantidad": 60,
-        "precioAcordado": 750.0
+        "cantidad": 1,
+        "precioAcordado": 45000.0
       }
     ]
   }

@@ -1,6 +1,7 @@
 package com.tpo.view.dialogs;
 
 import com.tpo.controller.FacturaController;
+import com.tpo.controller.SesionController;
 import com.tpo.model.dto.FacturaDTO;
 import com.tpo.model.entities.catalog.ItemProveedor;
 import com.tpo.model.entities.catalog.Producto;
@@ -40,7 +41,6 @@ public class FacturaDialog extends JDialog {
     private final JTextField txtPrecioOC;
     private final JTextField txtPrecioFactura;
     private final JCheckBox chkExisteOC;
-    private final JCheckBox chkAutorizado;
 
     private final FacturaController controller;
     private final int editIndex;
@@ -73,7 +73,12 @@ public class FacturaDialog extends JDialog {
         txtPrecioFactura = new JTextField(20);
         chkExisteOC = new JCheckBox("Existe OC previa");
         chkExisteOC.setSelected(true);
-        chkAutorizado = new JCheckBox("Autorizado por supervisor");
+
+        boolean esSupervisor = SesionController.getInstance().esSupervisor();
+        JLabel lblRol = new JLabel(esSupervisor
+                ? "Sesión: Supervisor (puede registrar sin OC y precios distintos)"
+                : "Sesión: Operador (requiere OC previa; precios distintos quedan observados)");
+        lblRol.setFont(lblRol.getFont().deriveFont(Font.ITALIC, 11f));
 
         if (existing != null && existing.getProveedor() != null) {
             comboProveedor.seleccionarPorRazonSocial(existing.getProveedor().getRazonSocial());
@@ -98,8 +103,9 @@ public class FacturaDialog extends JDialog {
         }
         gbc.gridx = 1; gbc.gridy = row++;
         form.add(chkExisteOC, gbc);
-        gbc.gridx = 1; gbc.gridy = row;
-        form.add(chkAutorizado, gbc);
+        gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 2;
+        form.add(lblRol, gbc);
+        gbc.gridwidth = 1;
 
         add(form, BorderLayout.CENTER);
 
@@ -154,10 +160,11 @@ public class FacturaDialog extends JDialog {
             ordenes.add(oc);
         }
 
+        boolean autorizadoSupervisor = SesionController.getInstance().esSupervisor();
         try {
             FacturaDTO dto = editIndex >= 0
-                    ? controller.editarFactura(editIndex, proveedor, ordenes, chkAutorizado.isSelected(), precioFactura)
-                    : controller.generarFactura(proveedor, ordenes, chkAutorizado.isSelected(), precioFactura);
+                    ? controller.editarFactura(editIndex, proveedor, ordenes, autorizadoSupervisor, precioFactura)
+                    : controller.generarFactura(proveedor, ordenes, autorizadoSupervisor, precioFactura);
             JOptionPane.showMessageDialog(this,
                     String.format("Factura %s.%nImporte total: %.2f%nEstado: %s",
                             editIndex >= 0 ? "actualizada" : "generada",

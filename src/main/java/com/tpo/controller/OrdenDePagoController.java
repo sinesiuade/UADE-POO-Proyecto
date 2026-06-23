@@ -2,8 +2,11 @@ package com.tpo.controller;
 
 import com.google.gson.reflect.TypeToken;
 import com.tpo.model.Enums.CondicionImpositiva;
+import com.tpo.model.dto.FacturaDTO;
 import com.tpo.model.dto.OrdenDePagoDTO;
 import com.tpo.model.entities.document.DocumentoComercial;
+import com.tpo.model.entities.document.Factura;
+import com.tpo.model.entities.order.DetallePagoDocumento;
 import com.tpo.model.entities.order.OrdenDePago;
 import com.tpo.model.entities.payment.ChequePropio;
 import com.tpo.model.entities.payment.ChequeTerceros;
@@ -15,6 +18,7 @@ import com.tpo.model.entities.tax.TipoImpuesto;
 import com.tpo.model.persistence.OpRecord;
 import com.tpo.util.JsonStore;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -71,6 +75,75 @@ public class OrdenDePagoController {
         return Collections.unmodifiableList(pagos);
     }
 
+    /** Imputación de la OP a una factura concreta (documento + monto aplicado). */
+    public static class ImputacionFactura {
+        public final FacturaDTO factura;
+        public final double monto;
+
+        public ImputacionFactura(FacturaDTO factura, double monto) {
+            this.factura = factura;
+            this.monto = monto;
+        }
+    }
+
+    /** Genera una OP imputando el monto indicado a cada factura seleccionada. */
+    public OrdenDePagoDTO generarOrdenDePagoPorFacturas(Proveedor proveedor,
+                                                        List<ImputacionFactura> imputaciones, MedioDePago medio) {
+        OrdenDePagoDTO dto = calcularPorFacturas(proveedor, imputaciones, medio);
+        pagos.add(dto);
+        // Imputa cada monto a su factura (cancelación total o parcial por documento).
+        for (ImputacionFactura imp : imputaciones) {
+            FacturaController.getInstance().aplicarPagoExacto(imp.factura, imp.monto);
+        }
+        persistir();
+        return dto;
+    }
+
+    /** Regenera una OP por facturas y la reemplaza (no re-imputa pagos para no duplicar saldos). */
+    public OrdenDePagoDTO editarOrdenDePagoPorFacturas(int index, Proveedor proveedor,
+                                                       List<ImputacionFactura> imputaciones, MedioDePago medio) {
+        OrdenDePagoDTO dto = calcularPorFacturas(proveedor, imputaciones, medio);
+        pagos.set(index, dto);
+        persistir();
+        return dto;
+    }
+
+    private OrdenDePagoDTO calcularPorFacturas(Proveedor proveedor,
+                                               List<ImputacionFactura> imputaciones, MedioDePago medio) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        List<DetallePagoDocumento> detallePagos = new ArrayList<>();
+        List<OrdenDePagoDTO.LineaPago> lineas = new ArrayList<>();
+
+        for (ImputacionFactura imp : imputaciones) {
+            // Documento de trabajo cuyo importe es el monto aplicado (para el cálculo de totales).
+            Factura doc = new Factura(proveedor);
+            doc.setImporteTotal((float) imp.monto);
+            detallePagos.add(new DetallePagoDocumento(doc, imp.monto));
+
+            String fecha = imp.factura.getFechaEmision() != null ? sdf.format(imp.factura.getFechaEmision()) : "";
+            lineas.add(new OrdenDePagoDTO.LineaPago(
+                    "Factura " + fecha + " (imp. " + String.format("%.2f", imp.factura.getImporteTotal()) + ")",
+                    imp.monto));
+        }
+
+        OrdenDePago op = new OrdenDePago(proveedor, detallePagos, true);
+        op.calcularTotales(ImpuestoController.getInstance().getImpuestos());
+
+        String medioNombre = null;
+        if (medio != null) {
+            medio.setImporte(op.getTotalNetoAPagar()); // se paga el neto
+            op.agregarMedioDePago(medio);
+            medioNombre = etiquetaMedio(medio);
+        }
+
+        OrdenDePagoDTO dto = new OrdenDePagoDTO(
+                op.getProveedor(), op.getFechaEmision(),
+                op.getTotalBrutoPagado(), op.getTotalRetenido(), op.getTotalNetoAPagar(),
+                op.getRetencionesPorImpuesto(), medioNombre);
+        dto.setLineasPago(lineas);
+        return dto;
+    }
+
     private OrdenDePagoDTO calcular(Proveedor proveedor, List<DocumentoComercial> documentos, MedioDePago medio) {
         OrdenDePago op = new OrdenDePago(proveedor, documentos);
         op.calcularTotales(ImpuestoController.getInstance().getImpuestos());
@@ -119,6 +192,14 @@ public class OrdenDePagoController {
         if (dto.getRetencionesPorImpuesto() != null) {
             dto.getRetencionesPorImpuesto().forEach((tipo, monto) -> r.retenciones.put(tipo.name(), monto));
         }
+        if (dto.getLineasPago() != null) {
+            for (OrdenDePagoDTO.LineaPago lp : dto.getLineasPago()) {
+                OpRecord.Linea linea = new OpRecord.Linea();
+                linea.documento = lp.getDocumento();
+                linea.montoAplicado = lp.getMontoAplicado();
+                r.lineas.add(linea);
+            }
+        }
         return r;
     }
 
@@ -134,6 +215,11 @@ public class OrdenDePagoController {
             r.retenciones.forEach((tipo, monto) -> retenciones.put(TipoImpuesto.valueOf(tipo), monto));
         }
         dto.setRetencionesPorImpuesto(retenciones);
+        if (r.lineas != null) {
+            for (OpRecord.Linea linea : r.lineas) {
+                dto.getLineasPago().add(new OrdenDePagoDTO.LineaPago(linea.documento, linea.montoAplicado));
+            }
+        }
         return dto;
     }
 }
