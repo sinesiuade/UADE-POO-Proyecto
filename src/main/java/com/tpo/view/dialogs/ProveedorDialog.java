@@ -32,6 +32,7 @@ public class ProveedorDialog extends JDialog {
     private final JTextField txtTelefono;
     private final JTextField txtEmail;
     private final JComboBox<CondicionImpositiva> comboCondicion;
+    private final JTextField txtLimite;
 
     private final ProveedorController controller;
     private final int editIndex;
@@ -43,7 +44,7 @@ public class ProveedorDialog extends JDialog {
     public ProveedorDialog(Frame parent, Proveedor existing, int editIndex) {
         super(parent, existing == null ? "Nuevo Proveedor" : "Editar Proveedor", true);
         this.editIndex = editIndex;
-        setSize(460, 420);
+        setSize(460, 460);
         setLocationRelativeTo(parent);
         setLayout(new BorderLayout(10, 10));
 
@@ -61,6 +62,7 @@ public class ProveedorDialog extends JDialog {
         txtTelefono = new JTextField(20);
         txtEmail = new JTextField(20);
         comboCondicion = new JComboBox<>(CondicionImpositiva.values());
+        txtLimite = new JTextField(20);
 
         if (existing != null) {
             if (existing.getCuit() > 0) txtCuit.setText(String.valueOf(existing.getCuit()));
@@ -70,6 +72,7 @@ public class ProveedorDialog extends JDialog {
             if (existing.getTelefono() > 0) txtTelefono.setText(String.valueOf(existing.getTelefono()));
             txtEmail.setText(existing.getEmail());
             if (existing.getCondicionImpositiva() != null) comboCondicion.setSelectedItem(existing.getCondicionImpositiva());
+            txtLimite.setText(String.valueOf(existing.getLimiteDeudaAutorizado()));
         }
 
         JPanel form = new JPanel(new GridBagLayout());
@@ -78,8 +81,8 @@ public class ProveedorDialog extends JDialog {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        String[] labels = {"CUIT:", "Razón Social:", "Nombre Comercial:", "Domicilio:", "Teléfono:", "Email:", "Condición Impositiva:"};
-        JComponent[] fields = {txtCuit, txtRazonSocial, txtNombreComercial, txtDomicilio, txtTelefono, txtEmail, comboCondicion};
+        String[] labels = {"CUIT:", "Razón Social:", "Nombre Comercial:", "Domicilio:", "Teléfono:", "Email:", "Condición Impositiva:", "Límite de Deuda:"};
+        JComponent[] fields = {txtCuit, txtRazonSocial, txtNombreComercial, txtDomicilio, txtTelefono, txtEmail, comboCondicion, txtLimite};
 
         for (int i = 0; i < labels.length; i++) {
             gbc.gridx = 0; gbc.gridy = i; gbc.weightx = 0.35;
@@ -108,11 +111,13 @@ public class ProveedorDialog extends JDialog {
         }
         long cuit = 0;
         long telefono = 0;
+        int limite = 0;
         try {
             if (!txtCuit.getText().trim().isEmpty()) cuit = Long.parseLong(txtCuit.getText().trim());
             if (!txtTelefono.getText().trim().isEmpty()) telefono = Long.parseLong(txtTelefono.getText().trim());
+            if (!txtLimite.getText().trim().isEmpty()) limite = Integer.parseInt(txtLimite.getText().trim());
         } catch (NumberFormatException e) {
-            error("CUIT y teléfono deben ser numéricos (sin guiones ni puntos).");
+            error("CUIT, teléfono y límite deben ser numéricos (sin guiones ni puntos).");
             return;
         }
 
@@ -131,6 +136,7 @@ public class ProveedorDialog extends JDialog {
         p.setTelefono(telefono);
         p.setEmail(txtEmail.getText().trim());
         p.setCondicionImpositiva((CondicionImpositiva) comboCondicion.getSelectedItem());
+        p.setLimiteDeudaAutorizado(limite);
 
         if (editIndex >= 0) {
             controller.editarProveedor(editIndex, p);

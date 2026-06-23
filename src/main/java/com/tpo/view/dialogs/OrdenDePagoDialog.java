@@ -1,7 +1,6 @@
 package com.tpo.view.dialogs;
 
 import com.tpo.controller.OrdenDePagoController;
-import com.tpo.model.Enums.CondicionImpositiva;
 import com.tpo.model.dto.OrdenDePagoDTO;
 import com.tpo.model.entities.document.DocumentoComercial;
 import com.tpo.model.entities.document.Factura;
@@ -11,6 +10,7 @@ import com.tpo.model.entities.payment.Efectivo;
 import com.tpo.model.entities.payment.MedioDePago;
 import com.tpo.model.entities.payment.Transferencia;
 import com.tpo.model.entities.supplier.Proveedor;
+import com.tpo.view.components.ProveedorSelector;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -37,8 +37,7 @@ public class OrdenDePagoDialog extends JDialog {
 
     private static final String[] MEDIOS = {"Efectivo", "Transferencia", "Cheque Propio", "Cheque de Terceros"};
 
-    private final JTextField txtProveedor;
-    private final JComboBox<CondicionImpositiva> comboCondicion;
+    private final ProveedorSelector comboProveedor;
     private final JTextField txtBruto;
     private final JComboBox<String> comboMedio;
 
@@ -54,7 +53,7 @@ public class OrdenDePagoDialog extends JDialog {
     public OrdenDePagoDialog(Frame parent, OrdenDePagoDTO existing, int editIndex) {
         super(parent, existing == null ? "Nueva Orden de Pago" : "Editar Orden de Pago", true);
         this.editIndex = editIndex;
-        setSize(440, 320);
+        setSize(440, 280);
         setLocationRelativeTo(parent);
         setLayout(new BorderLayout(10, 10));
 
@@ -65,17 +64,13 @@ public class OrdenDePagoDialog extends JDialog {
         header.setBorder(BorderFactory.createEmptyBorder(15, 10, 5, 10));
         add(header, BorderLayout.NORTH);
 
-        txtProveedor = new JTextField(20);
-        comboCondicion = new JComboBox<>(CondicionImpositiva.values());
+        comboProveedor = new ProveedorSelector();
         txtBruto = new JTextField(20);
         comboMedio = new JComboBox<>(MEDIOS);
 
         if (existing != null) {
             if (existing.getProveedor() != null) {
-                txtProveedor.setText(existing.getProveedor().getRazonSocial());
-                if (existing.getProveedor().getCondicionImpositiva() != null) {
-                    comboCondicion.setSelectedItem(existing.getProveedor().getCondicionImpositiva());
-                }
+                comboProveedor.seleccionarPorRazonSocial(existing.getProveedor().getRazonSocial());
             }
             txtBruto.setText(String.valueOf(existing.getTotalBrutoPagado()));
             if (existing.getMedioDePago() != null) {
@@ -89,8 +84,8 @@ public class OrdenDePagoDialog extends JDialog {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        String[] labels = {"Proveedor:", "Condición impositiva:", "Total bruto a pagar:", "Medio de pago:"};
-        JComponent[] fields = {txtProveedor, comboCondicion, txtBruto, comboMedio};
+        String[] labels = {"Proveedor:", "Total bruto a pagar:", "Medio de pago:"};
+        JComponent[] fields = {comboProveedor, txtBruto, comboMedio};
 
         for (int i = 0; i < labels.length; i++) {
             gbc.gridx = 0; gbc.gridy = i; gbc.weightx = 0.45;
@@ -112,9 +107,13 @@ public class OrdenDePagoDialog extends JDialog {
     }
 
     private void generar() {
-        String proveedorStr = txtProveedor.getText().trim();
-        if (proveedorStr.isEmpty()) {
-            error("El proveedor es obligatorio.");
+        if (!comboProveedor.hayProveedores()) {
+            error("No hay proveedores cargados. Cargá un proveedor primero.");
+            return;
+        }
+        Proveedor proveedor = comboProveedor.getSeleccionado();
+        if (proveedor == null) {
+            error("Seleccioná un proveedor.");
             return;
         }
         float bruto;
@@ -124,10 +123,6 @@ public class OrdenDePagoDialog extends JDialog {
             error("El total bruto debe ser un valor numérico.");
             return;
         }
-
-        Proveedor proveedor = new Proveedor();
-        proveedor.setRazonSocial(proveedorStr);
-        proveedor.setCondicionImpositiva((CondicionImpositiva) comboCondicion.getSelectedItem());
 
         // Los documentos a cancelar se representan por su importe agregado.
         Factura documento = new Factura(proveedor);

@@ -4,12 +4,13 @@ import com.tpo.controller.OrdenDeCompraController;
 import com.tpo.model.dto.OrdenDeCompraDTO;
 import com.tpo.model.entities.catalog.Producto;
 import com.tpo.model.entities.catalog.Rubro;
-import com.tpo.model.entities.order.DetalleItemOC;
 import com.tpo.model.entities.order.OrdenDeCompra;
 import com.tpo.model.entities.supplier.Proveedor;
+import com.tpo.view.components.ProveedorSelector;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -32,10 +33,8 @@ public class OrdenDeCompraDialog extends JDialog {
 
     private final JTextField txtNumero;
     private final JTextField txtFecha;
-    private final JTextField txtProveedor;
+    private final ProveedorSelector comboProveedor;
     private final JTextField txtRubro;
-    private final JTextField txtLimite;
-    private final JTextField txtDeuda;
     private final JTextField txtMonto;
 
     private final OrdenDeCompraController controller;
@@ -50,7 +49,7 @@ public class OrdenDeCompraDialog extends JDialog {
     public OrdenDeCompraDialog(Frame parent, OrdenDeCompraDTO existing, int editIndex) {
         super(parent, existing == null ? "Nueva Orden de Compra" : "Editar Orden de Compra", true);
         this.editIndex = editIndex;
-        setSize(440, 420);
+        setSize(440, 340);
         setLocationRelativeTo(parent);
         setLayout(new BorderLayout(10, 10));
 
@@ -63,23 +62,17 @@ public class OrdenDeCompraDialog extends JDialog {
 
         txtNumero = new JTextField(20);
         txtFecha = new JTextField(20);
-        txtProveedor = new JTextField(20);
+        comboProveedor = new ProveedorSelector();
         txtRubro = new JTextField(20);
-        txtLimite = new JTextField(20);
-        txtDeuda = new JTextField(20);
         txtMonto = new JTextField(20);
 
         if (existing != null) {
             txtNumero.setText(String.valueOf(existing.getNumero()));
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
             if (existing.getFecha() != null) txtFecha.setText(sdf.format(existing.getFecha()));
-            if (existing.getProveedor() != null) {
-                txtProveedor.setText(existing.getProveedor().getRazonSocial());
-                txtLimite.setText(String.valueOf(existing.getProveedor().getLimiteDeudaAutorizado()));
-                txtDeuda.setText(String.valueOf(existing.getProveedor().getDeudaActual()));
-            }
+            if (existing.getProveedor() != null) comboProveedor.seleccionarPorRazonSocial(existing.getProveedor().getRazonSocial());
             if (existing.getDetalleItems() != null && !existing.getDetalleItems().isEmpty()) {
-                DetalleItemOC primera = existing.getDetalleItems().get(0);
+                var primera = existing.getDetalleItems().get(0);
                 if (primera.getItem() != null && primera.getItem().getRubro() != null) {
                     txtRubro.setText(primera.getItem().getRubro().getNombre());
                 }
@@ -93,9 +86,8 @@ public class OrdenDeCompraDialog extends JDialog {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        String[] labels = {"Número:", "Fecha (dd/MM/yyyy):", "Proveedor:", "Rubro:",
-                "Límite autorizado:", "Deuda actual:", "Monto de la orden:"};
-        JTextField[] fields = {txtNumero, txtFecha, txtProveedor, txtRubro, txtLimite, txtDeuda, txtMonto};
+        String[] labels = {"Número:", "Fecha (dd/MM/yyyy):", "Proveedor:", "Rubro:", "Monto de la orden:"};
+        JComponent[] fields = {txtNumero, txtFecha, comboProveedor, txtRubro, txtMonto};
 
         for (int i = 0; i < labels.length; i++) {
             gbc.gridx = 0; gbc.gridy = i; gbc.weightx = 0.45;
@@ -117,26 +109,30 @@ public class OrdenDeCompraDialog extends JDialog {
     }
 
     private void guardar() {
+        if (!comboProveedor.hayProveedores()) {
+            error("No hay proveedores cargados. Cargá un proveedor primero.");
+            return;
+        }
+        Proveedor proveedor = comboProveedor.getSeleccionado();
+        if (proveedor == null) {
+            error("Seleccioná un proveedor.");
+            return;
+        }
+
         String numeroStr = txtNumero.getText().trim();
         String fechaStr = txtFecha.getText().trim();
-        String proveedorStr = txtProveedor.getText().trim();
-
-        if (numeroStr.isEmpty() || fechaStr.isEmpty() || proveedorStr.isEmpty()) {
-            error("Número, fecha y proveedor son obligatorios.");
+        if (numeroStr.isEmpty() || fechaStr.isEmpty()) {
+            error("Número y fecha son obligatorios.");
             return;
         }
 
         int numero;
-        int limite;
-        double deuda;
         double monto;
         try {
             numero = Integer.parseInt(numeroStr);
-            limite = Integer.parseInt(txtLimite.getText().trim());
-            deuda = Double.parseDouble(txtDeuda.getText().trim());
             monto = Double.parseDouble(txtMonto.getText().trim());
         } catch (NumberFormatException e) {
-            error("Número, límite, deuda y monto deben ser valores numéricos.");
+            error("Número y monto deben ser valores numéricos.");
             return;
         }
 
@@ -149,11 +145,6 @@ public class OrdenDeCompraDialog extends JDialog {
             error("La fecha debe tener el formato dd/MM/yyyy.");
             return;
         }
-
-        Proveedor proveedor = new Proveedor();
-        proveedor.setRazonSocial(proveedorStr);
-        proveedor.setLimiteDeudaAutorizado(limite);
-        proveedor.setDeudaActual(deuda);
 
         OrdenDeCompra oc = new OrdenDeCompra(numero, fecha, proveedor, null);
         Producto item = new Producto();
