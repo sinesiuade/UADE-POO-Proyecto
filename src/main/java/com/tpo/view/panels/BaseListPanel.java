@@ -22,6 +22,7 @@ public abstract class BaseListPanel extends JPanel {
 
     protected final DefaultTableModel tableModel;
     protected final JTable table;
+    protected final JPanel barraSuperior;
 
     protected BaseListPanel(String buttonLabel, String[] columnas) {
         setLayout(new BorderLayout());
@@ -45,7 +46,7 @@ public abstract class BaseListPanel extends JPanel {
         table.getColumnModel().getColumn(editCol).setCellRenderer(new EditButtonRenderer());
         table.getColumnModel().getColumn(editCol).setCellEditor(new EditButtonEditor(this::abrirEdicion));
 
-        JPanel barraSuperior = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 6));
+        barraSuperior = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 6));
         barraSuperior.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY));
         JButton btnNuevo = new JButton(buttonLabel);
         btnNuevo.addActionListener(e -> abrirCreacion());

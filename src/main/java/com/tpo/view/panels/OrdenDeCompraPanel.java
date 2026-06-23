@@ -1,9 +1,12 @@
 package com.tpo.view.panels;
 
 import com.tpo.controller.OrdenDeCompraController;
+import com.tpo.controller.SesionController;
 import com.tpo.model.dto.OrdenDeCompraDTO;
 import com.tpo.view.dialogs.OrdenDeCompraDialog;
 
+import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
@@ -14,6 +17,32 @@ public class OrdenDeCompraPanel extends BaseListPanel {
     public OrdenDeCompraPanel() {
         super("+ Nueva Orden de Compra", new String[]{"Número", "Fecha", "Proveedor", "Estado"});
         controller = OrdenDeCompraController.getInstance();
+
+        // Acción exclusiva del supervisor: aprobar OC pendientes de aprobación.
+        if (SesionController.getInstance().esSupervisor()) {
+            JButton btnAprobar = new JButton("✓ Aprobar seleccionada");
+            btnAprobar.addActionListener(e -> aprobarSeleccionada());
+            barraSuperior.add(btnAprobar);
+        }
+
+        refrescar();
+    }
+
+    private void aprobarSeleccionada() {
+        int row = table.getSelectedRow();
+        if (row < 0) {
+            JOptionPane.showMessageDialog(this, "Seleccioná una orden de compra.",
+                    "Aprobar OC", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        try {
+            OrdenDeCompraDTO dto = controller.aprobarOrdenDeCompra(row);
+            JOptionPane.showMessageDialog(this,
+                    "Orden de compra N° " + dto.getNumero() + " aprobada.\nEstado: " + dto.getEstado(),
+                    "Aprobar OC", JOptionPane.INFORMATION_MESSAGE);
+        } catch (RuntimeException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Aprobar OC", JOptionPane.ERROR_MESSAGE);
+        }
         refrescar();
     }
 

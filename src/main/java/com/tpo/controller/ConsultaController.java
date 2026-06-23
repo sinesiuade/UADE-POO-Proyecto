@@ -30,10 +30,12 @@ public class ConsultaController {
         reportes.put("Documentos recibidos (detalle por fecha)", this::documentosDetalle);
         // 2. Gestión de Deuda (Cuenta Corriente)
         reportes.put("Cuenta corriente por proveedor", this::cuentaCorrientePorProveedor);
+        reportes.put("Cuenta corriente (movimientos cronológicos)", this::cuentaCorrienteCronologica);
         reportes.put("Deuda actual por proveedor", this::deudaActualPorProveedor);
         reportes.put("Documentos pendientes de pago", this::documentosPendientesDePago);
         // 3. Seguimiento de Compras y Pagos
         reportes.put("Órdenes de compra por estado", this::ordenesDeCompraPorEstado);
+        reportes.put("Órdenes de compra por rubro", this::ordenesDeCompraPorRubro);
         reportes.put("Órdenes de compra por proveedor", this::ordenesDeCompraPorProveedor);
         reportes.put("Pagos realizados por proveedor", this::pagosPorProveedor);
         reportes.put("Pagos realizados por período", this::pagosPorPeriodo);
@@ -185,6 +187,63 @@ public class ConsultaController {
         return r;
     }
 
+    /** Movimiento de cuenta corriente: cargo (Debe) o pago/crédito (Haber). */
+    private static class Movimiento {
+        final String proveedor;
+        final Date fecha;
+        final String tipo;
+        final double debe;
+        final double haber;
+
+        Movimiento(String proveedor, Date fecha, String tipo, double debe, double haber) {
+            this.proveedor = proveedor;
+            this.fecha = fecha;
+            this.tipo = tipo;
+            this.debe = debe;
+            this.haber = haber;
+        }
+    }
+
+    private ReporteDTO cuentaCorrienteCronologica() {
+        ReporteDTO r = new ReporteDTO("Cuenta corriente (movimientos cronológicos)",
+                new String[]{"Proveedor", "Fecha", "Tipo", "Debe", "Haber", "Saldo"});
+
+        List<Movimiento> movs = new ArrayList<>();
+        for (FacturaDTO f : FacturaController.getInstance().getFacturas()) {
+            movs.add(new Movimiento(nombre(f.getProveedor()), f.getFechaEmision(), "Factura", f.getImporteTotal(), 0));
+        }
+        for (NotaDTO n : NotaController.getInstance().getNotas()) {
+            boolean credito = NotaDTO.CREDITO.equals(n.getTipo());
+            movs.add(new Movimiento(nombre(n.getProveedor()), n.getFechaEmision(), n.getTipo(),
+                    credito ? 0 : n.getImporteTotal(), credito ? n.getImporteTotal() : 0));
+        }
+        for (OrdenDePagoDTO p : OrdenDePagoController.getInstance().getPagos()) {
+            movs.add(new Movimiento(nombre(p.getProveedor()), p.getFechaEmision(), "Pago", 0, p.getTotalBrutoPagado()));
+        }
+
+        // Ordena por proveedor y luego por fecha (cronológico)
+        movs.sort(Comparator.comparing((Movimiento m) -> m.proveedor)
+                .thenComparing(m -> m.fecha, Comparator.nullsLast(Comparator.naturalOrder())));
+
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy");
+        String provActual = null;
+        double saldo = 0;
+        for (Movimiento m : movs) {
+            if (!m.proveedor.equals(provActual)) {
+                provActual = m.proveedor;
+                saldo = 0; // reinicia el saldo corriente por proveedor
+            }
+            saldo += m.debe - m.haber;
+            r.agregarFila(m.proveedor,
+                    m.fecha != null ? sdf.format(m.fecha) : "",
+                    m.tipo,
+                    String.format("%.2f", m.debe),
+                    String.format("%.2f", m.haber),
+                    String.format("%.2f", saldo));
+        }
+        return r;
+    }
+
     private ReporteDTO deudaActualPorProveedor() {
         ReporteDTO r = new ReporteDTO("Deuda actual por proveedor",
                 new String[]{"Proveedor", "Deuda Actual"});
@@ -240,6 +299,28 @@ public class ConsultaController {
             v[1] += oc.getTotalBruto();
         }
         acc.forEach((estado, v) -> r.agregarFila(estado, (int) v[0], String.format("%.2f", v[1])));
+        return r;
+    }
+
+    private ReporteDTO ordenesDeCompraPorRubro() {
+        ReporteDTO r = new ReporteDTO("Órdenes de compra por rubro",
+                new String[]{"Rubro", "Cantidad de OC", "Total"});
+        Map<String, java.util.Set<Integer>> ocsPorRubro = new LinkedHashMap<>();
+        Map<String, Double> totalPorRubro = new LinkedHashMap<>();
+        for (OrdenDeCompraDTO oc : OrdenDeCompraController.getInstance().getOrdenes()) {
+            if (oc.getDetalleItems() == null) {
+                continue;
+            }
+            for (DetalleItemOC d : oc.getDetalleItems()) {
+                String rubro = d.getItem() != null && d.getItem().getRubro() != null
+                        && d.getItem().getRubro().getNombre() != null
+                        ? d.getItem().getRubro().getNombre() : "(sin rubro)";
+                ocsPorRubro.computeIfAbsent(rubro, k -> new java.util.HashSet<>()).add(oc.getNumero());
+                totalPorRubro.merge(rubro, d.getPrecioTotal(), Double::sum);
+            }
+        }
+        ocsPorRubro.forEach((rubro, ocs) ->
+                r.agregarFila(rubro, ocs.size(), String.format("%.2f", totalPorRubro.get(rubro))));
         return r;
     }
 

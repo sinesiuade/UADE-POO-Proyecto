@@ -1,16 +1,19 @@
 package com.tpo.view.dialogs;
 
 import com.tpo.controller.FacturaController;
+import com.tpo.controller.SesionController;
 import com.tpo.model.dto.FacturaDTO;
 import com.tpo.model.entities.catalog.ItemProveedor;
 import com.tpo.model.entities.catalog.Producto;
 import com.tpo.model.entities.catalog.Rubro;
 import com.tpo.model.entities.order.OrdenDeCompra;
 import com.tpo.model.entities.supplier.Proveedor;
+import com.tpo.view.components.ProveedorSelector;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -31,14 +34,13 @@ import java.util.List;
 /** Diálogo de Factura (una línea representativa del flujo de generación). */
 public class FacturaDialog extends JDialog {
 
-    private final JTextField txtProveedor;
+    private final ProveedorSelector comboProveedor;
     private final JTextField txtRubro;
     private final JTextField txtConcepto;
     private final JTextField txtCantidad;
     private final JTextField txtPrecioOC;
     private final JTextField txtPrecioFactura;
     private final JCheckBox chkExisteOC;
-    private final JCheckBox chkAutorizado;
 
     private final FacturaController controller;
     private final int editIndex;
@@ -63,7 +65,7 @@ public class FacturaDialog extends JDialog {
         header.setBorder(BorderFactory.createEmptyBorder(15, 10, 5, 10));
         add(header, BorderLayout.NORTH);
 
-        txtProveedor = new JTextField(20);
+        comboProveedor = new ProveedorSelector();
         txtRubro = new JTextField(20);
         txtConcepto = new JTextField(20);
         txtCantidad = new JTextField(20);
@@ -71,10 +73,15 @@ public class FacturaDialog extends JDialog {
         txtPrecioFactura = new JTextField(20);
         chkExisteOC = new JCheckBox("Existe OC previa");
         chkExisteOC.setSelected(true);
-        chkAutorizado = new JCheckBox("Autorizado por supervisor");
+
+        boolean esSupervisor = SesionController.getInstance().esSupervisor();
+        JLabel lblRol = new JLabel(esSupervisor
+                ? "Sesión: Supervisor (puede registrar sin OC y precios distintos)"
+                : "Sesión: Operador (requiere OC previa; precios distintos quedan observados)");
+        lblRol.setFont(lblRol.getFont().deriveFont(Font.ITALIC, 11f));
 
         if (existing != null && existing.getProveedor() != null) {
-            txtProveedor.setText(existing.getProveedor().getRazonSocial());
+            comboProveedor.seleccionarPorRazonSocial(existing.getProveedor().getRazonSocial());
         }
 
         JPanel form = new JPanel(new GridBagLayout());
@@ -85,7 +92,7 @@ public class FacturaDialog extends JDialog {
 
         String[] labels = {"Proveedor:", "Rubro:", "Concepto del ítem:", "Cantidad:",
                 "Precio OC (acordado):", "Precio Factura:"};
-        JTextField[] fields = {txtProveedor, txtRubro, txtConcepto, txtCantidad, txtPrecioOC, txtPrecioFactura};
+        JComponent[] fields = {comboProveedor, txtRubro, txtConcepto, txtCantidad, txtPrecioOC, txtPrecioFactura};
 
         int row = 0;
         for (; row < labels.length; row++) {
@@ -96,8 +103,9 @@ public class FacturaDialog extends JDialog {
         }
         gbc.gridx = 1; gbc.gridy = row++;
         form.add(chkExisteOC, gbc);
-        gbc.gridx = 1; gbc.gridy = row;
-        form.add(chkAutorizado, gbc);
+        gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 2;
+        form.add(lblRol, gbc);
+        gbc.gridwidth = 1;
 
         add(form, BorderLayout.CENTER);
 
@@ -112,9 +120,13 @@ public class FacturaDialog extends JDialog {
     }
 
     private void generar() {
-        String proveedorStr = txtProveedor.getText().trim();
-        if (proveedorStr.isEmpty()) {
-            error("El proveedor es obligatorio.");
+        if (!comboProveedor.hayProveedores()) {
+            error("No hay proveedores cargados. Cargá un proveedor primero.");
+            return;
+        }
+        Proveedor seleccionado = comboProveedor.getSeleccionado();
+        if (seleccionado == null) {
+            error("Seleccioná un proveedor.");
             return;
         }
         int cantidad;
@@ -129,14 +141,15 @@ public class FacturaDialog extends JDialog {
             return;
         }
 
-        // Proveedor habilitado para el rubro y el ítem.
+        // Proveedor habilitado para el rubro y el ítem (copia de trabajo para no mutar el catálogo).
         Rubro rubro = new Rubro(txtRubro.getText().trim());
         Producto item = new Producto();
         item.setDescripcion(txtConcepto.getText().trim());
         item.setRubro(rubro);
 
         Proveedor proveedor = new Proveedor();
-        proveedor.setRazonSocial(proveedorStr);
+        proveedor.setRazonSocial(seleccionado.getRazonSocial());
+        proveedor.setCondicionImpositiva(seleccionado.getCondicionImpositiva());
         proveedor.getRubros().add(rubro);
         proveedor.getItemsProvistos().add(new ItemProveedor(precioOC, item, proveedor));
 
@@ -147,10 +160,11 @@ public class FacturaDialog extends JDialog {
             ordenes.add(oc);
         }
 
+        boolean autorizadoSupervisor = SesionController.getInstance().esSupervisor();
         try {
             FacturaDTO dto = editIndex >= 0
-                    ? controller.editarFactura(editIndex, proveedor, ordenes, chkAutorizado.isSelected(), precioFactura)
-                    : controller.generarFactura(proveedor, ordenes, chkAutorizado.isSelected(), precioFactura);
+                    ? controller.editarFactura(editIndex, proveedor, ordenes, autorizadoSupervisor, precioFactura)
+                    : controller.generarFactura(proveedor, ordenes, autorizadoSupervisor, precioFactura);
             JOptionPane.showMessageDialog(this,
                     String.format("Factura %s.%nImporte total: %.2f%nEstado: %s",
                             editIndex >= 0 ? "actualizada" : "generada",

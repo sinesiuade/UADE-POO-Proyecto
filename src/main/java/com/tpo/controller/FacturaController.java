@@ -62,6 +62,20 @@ public class FacturaController {
         return Collections.unmodifiableList(facturas);
     }
 
+    /** Aprobación de supervisor: levanta la observación de una factura observada. */
+    public FacturaDTO aprobarFactura(int index) {
+        if (index < 0 || index >= facturas.size()) {
+            throw new IllegalArgumentException("Factura inexistente.");
+        }
+        FacturaDTO dto = facturas.get(index);
+        if (!dto.isObservada()) {
+            throw new IllegalStateException("La factura no está observada.");
+        }
+        dto.setObservada(false);
+        persistir();
+        return dto;
+    }
+
     private FacturaDTO armar(Proveedor proveedor, List<OrdenDeCompra> ordenesRelacionadas,
                              boolean autorizadoSupervisor, double precioFacturadoUnitario) {
         // Origen: OC previa o autorización del supervisor.
@@ -99,6 +113,30 @@ public class FacturaController {
         return new FacturaDTO(
                 factura.getProveedor(), factura.getFechaEmision(),
                 factura.getTotalBruto(), factura.getDetalleItems().size(), factura.isObservada(), 0.0);
+    }
+
+    /** Facturas del proveedor con saldo pendiente (para imputar pagos por documento). */
+    public List<FacturaDTO> getPendientesPorProveedor(String proveedor) {
+        List<FacturaDTO> pendientes = new ArrayList<>();
+        if (proveedor == null) {
+            return pendientes;
+        }
+        for (FacturaDTO f : facturas) {
+            if (f.getProveedor() != null && proveedor.equals(f.getProveedor().getRazonSocial()) && f.getSaldo() > 0) {
+                pendientes.add(f);
+            }
+        }
+        return pendientes;
+    }
+
+    /** Imputa un monto exacto a una factura concreta y actualiza su saldo. */
+    public void aplicarPagoExacto(FacturaDTO factura, double monto) {
+        if (factura == null || monto <= 0) {
+            return;
+        }
+        double aplicar = Math.min(monto, factura.getSaldo());
+        factura.setMontoPagado(factura.getMontoPagado() + aplicar);
+        persistir();
     }
 
     /** Aplica un pago a las facturas pendientes del proveedor (las más antiguas primero). */

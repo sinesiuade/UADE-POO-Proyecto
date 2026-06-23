@@ -4,6 +4,7 @@ import com.google.gson.reflect.TypeToken;
 import com.tpo.model.Enums.EstadoOrdenDeCompra;
 import com.tpo.model.dto.OrdenDeCompraDTO;
 import com.tpo.model.entities.catalog.Producto;
+import com.tpo.model.entities.catalog.Rubro;
 import com.tpo.model.entities.order.DetalleItemOC;
 import com.tpo.model.entities.order.OrdenDeCompra;
 import com.tpo.model.entities.supplier.Proveedor;
@@ -58,6 +59,20 @@ public class OrdenDeCompraController {
         return Collections.unmodifiableList(ordenes);
     }
 
+    /** Aprobación de supervisor: pasa una OC en Pendiente de Aprobación a Emitida. */
+    public OrdenDeCompraDTO aprobarOrdenDeCompra(int index) {
+        if (index < 0 || index >= ordenes.size()) {
+            throw new IllegalArgumentException("Orden de compra inexistente.");
+        }
+        OrdenDeCompraDTO dto = ordenes.get(index);
+        if (dto.getEstado() != EstadoOrdenDeCompra.PENDIENTE_APROBACION) {
+            throw new IllegalStateException("Solo se pueden aprobar órdenes en estado Pendiente de Aprobación.");
+        }
+        dto.setEstado(EstadoOrdenDeCompra.EMITIDA);
+        persistir();
+        return dto;
+    }
+
     /** Recalcula el bruto, define el estado según el límite y mapea a DTO. */
     private OrdenDeCompraDTO validarYMapear(OrdenDeCompra oc) {
         oc.recalcularTotalBruto();
@@ -93,6 +108,7 @@ public class OrdenDeCompraController {
             for (DetalleItemOC d : dto.getDetalleItems()) {
                 OcRecord.Linea linea = new OcRecord.Linea();
                 linea.descripcion = d.getItem() != null ? d.getItem().getDescripcion() : null;
+                linea.rubro = d.getItem() != null && d.getItem().getRubro() != null ? d.getItem().getRubro().getNombre() : null;
                 linea.cantidad = d.getCantidad();
                 linea.precioAcordado = d.getPrecioAcordado();
                 r.lineas.add(linea);
@@ -115,6 +131,9 @@ public class OrdenDeCompraController {
         for (OcRecord.Linea linea : r.lineas) {
             Producto item = new Producto();
             item.setDescripcion(linea.descripcion);
+            if (linea.rubro != null) {
+                item.setRubro(new Rubro(linea.rubro));
+            }
             detalles.add(new DetalleItemOC(item, linea.cantidad, linea.precioAcordado));
         }
         dto.setDetalleItems(detalles);

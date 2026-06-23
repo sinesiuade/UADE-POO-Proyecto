@@ -191,6 +191,38 @@ class ConsultasTest {
     }
 
     @Test
+    void cuentaCorrienteCronologica_acumulaSaldoCorriente() {
+        // PROV (sonda @BeforeAll): Factura 500 + Pago 500 -> saldo final 0
+        ReporteDTO crono = ConsultaController.getInstance().ejecutar("Cuenta corriente (movimientos cronológicos)");
+        String ultimoSaldo = null;
+        for (Object[] f : crono.getFilas()) {
+            if (PROV.equals(f[0])) {
+                ultimoSaldo = String.valueOf(f[5]);
+            }
+        }
+        assertNotNull(ultimoSaldo, "Debe haber movimientos para el proveedor sonda");
+        assertEquals(fmt(0), ultimoSaldo);
+    }
+
+    @Test
+    void ordenesDeCompraPorRubro_agrupaPorRubro() {
+        com.tpo.model.entities.supplier.Proveedor p = new com.tpo.model.entities.supplier.Proveedor();
+        p.setRazonSocial("RubroProbe SA");
+        p.setLimiteDeudaAutorizado(1000000);
+        Rubro rubro = new Rubro("RubroProbe");
+        Producto item = new Producto();
+        item.setDescripcion("Ítem rubro");
+        item.setRubro(rubro);
+        OrdenDeCompra oc = new OrdenDeCompra(970, new Date(), p, null);
+        oc.agregarItem(item, 1, 100.0);
+        OrdenDeCompraController.getInstance().crearOrdenDeCompra(oc);
+
+        ReporteDTO r = ConsultaController.getInstance().ejecutar("Órdenes de compra por rubro");
+        boolean tiene = r.getFilas().stream().anyMatch(f -> "RubroProbe".equals(f[0]));
+        assertTrue(tiene, "Debe agrupar la OC sonda bajo su rubro");
+    }
+
+    @Test
     void documentosPendientesDePago_listaPendienteYNoLosCancelados() {
         ReporteDTO r = ConsultaController.getInstance().ejecutar("Documentos pendientes de pago");
 

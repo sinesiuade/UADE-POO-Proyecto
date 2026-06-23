@@ -11,7 +11,7 @@ public class ImpuestoPanel extends BaseListPanel {
     private final ImpuestoController controller;
 
     public ImpuestoPanel() {
-        super("+ Nuevo Impuesto", new String[]{"Tipo de Impuesto", "Porcentaje (%)"});
+        super("+ Nuevo Impuesto", new String[]{"Tipo de Impuesto", "Porcentaje (%)", "Mínimo No Imponible"});
         controller = ImpuestoController.getInstance();
         refrescar();
     }
@@ -33,7 +33,8 @@ public class ImpuestoPanel extends BaseListPanel {
     public void refrescar() {
         tableModel.setRowCount(0);
         for (Impuesto impuesto : controller.getImpuestos()) {
-            tableModel.addRow(new Object[]{impuesto.getNombre(), String.format("%.2f", impuesto.getPorcentaje())});
+            tableModel.addRow(new Object[]{impuesto.getNombre(), String.format("%.2f", impuesto.getPorcentaje()),
+                    String.format("%.2f", impuesto.getMinimoNoImponible())});
         }
     }
 }

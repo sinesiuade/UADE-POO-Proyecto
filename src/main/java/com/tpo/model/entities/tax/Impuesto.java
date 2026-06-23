@@ -18,6 +18,13 @@ public class Impuesto {
 
     private TipoImpuesto nombre;
     private double porcentaje;
+    /** Mínimo No Imponible: si el bruto no lo supera, no se retiene (umbral todo-o-nada). */
+    private double minimoNoImponible;
+
+    public Impuesto(TipoImpuesto nombre, double porcentaje) {
+        this.nombre = nombre;
+        this.porcentaje = porcentaje;
+    }
 
     /** Retención del impuesto sobre el bruto, si corresponde aplicarlo. */
     public double calcularRetencion(Proveedor proveedor, double totalBruto) {
@@ -25,6 +32,10 @@ public class Impuesto {
         List<CertificadoDeExclusion> certificados = proveedor.getListaCertificadosDeExclusion();
 
         if (!validarAplicacion(condicion, certificados)) {
+            return 0.0;
+        }
+        // Mínimo No Imponible: no se retiene si la base no supera el umbral.
+        if (totalBruto <= minimoNoImponible) {
             return 0.0;
         }
         return totalBruto * (porcentaje / 100.0);

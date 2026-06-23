@@ -1,0 +1,58 @@
+[
+  {
+    "cuit": 30712345678,
+    "razonSocial": "Farmacéutica del Sur SA",
+    "nombreComercial": "FarmaSur",
+    "domicilio": "Av. Mitre 1450, Avellaneda, Buenos Aires",
+    "telefono": 1143215678,
+    "email": "ventas@farmasur.com.ar",
+    "condicionImpositiva": "RESPONSABLE_INSCRIPTO",
+    "nroInscripcionFiscal": 901234567,
+    "fechaInicioAct": 1577847600000,
+    "limiteDeudaAutorizado": 500000,
+    "deudaActual": 120000.0,
+    "rubros": ["Laboratorio medicinal", "Insumos descartables y estériles"]
+  },
+  {
+    "cuit": 30709876543,
+    "razonSocial": "Insumos Médicos del Litoral SRL",
+    "nombreComercial": "InsuLitoral",
+    "domicilio": "San Martín 870, Rosario, Santa Fe",
+    "telefono": 3414567890,
+    "email": "contacto@insulitoral.com",
+    "condicionImpositiva": "RESPONSABLE_INSCRIPTO",
+    "nroInscripcionFiscal": 902345678,
+    "fechaInicioAct": 1609470000000,
+    "limiteDeudaAutorizado": 300000,
+    "deudaActual": 250000.0,
+    "rubros": ["Insumos descartables y estériles", "Tecnología médica y equipamiento"]
+  },
+  {
+    "cuit": 30765432109,
+    "razonSocial": "Servicios Generales del Norte SA",
+    "nombreComercial": "SerNorte",
+    "domicilio": "Belgrano 240, San Miguel de Tucumán, Tucumán",
+    "telefono": 3815551234,
+    "email": "admin@sernorte.com.ar",
+    "condicionImpositiva": "MONOTRIBUTISTA",
+    "nroInscripcionFiscal": 903456789,
+    "fechaInicioAct": 1640998800000,
+    "limiteDeudaAutorizado": 150000,
+    "deudaActual": 0.0,
+    "rubros": ["Limpieza y desinfección", "Seguridad y vigilancia"]
+  },
+  {
+    "cuit": 30688112233,
+    "razonSocial": "Diagnóstico por Imágenes del Plata SA",
+    "nombreComercial": "ImagenPlata",
+    "domicilio": "Calle 50 Nº 1200, La Plata, Buenos Aires",
+    "telefono": 2214449988,
+    "email": "turnos@imagenplata.com.ar",
+    "condicionImpositiva": "RESPONSABLE_INSCRIPTO",
+    "nroInscripcionFiscal": 904567890,
+    "fechaInicioAct": 1656644400000,
+    "limiteDeudaAutorizado": 400000,
+    "deudaActual": 60000.0,
+    "rubros": ["Estudios de diagnóstico por imágenes"]
+  }
+]

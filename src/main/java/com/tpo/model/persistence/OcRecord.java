@@ -16,6 +16,7 @@ public class OcRecord {
 
     public static class Linea {
         public String descripcion;
+        public String rubro;
         public int cantidad;
         public double precioAcordado;
     }

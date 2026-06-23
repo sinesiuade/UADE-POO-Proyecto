@@ -19,10 +19,10 @@ public class ImpuestoController {
     private ImpuestoController() {
         impuestos = JsonStore.load(ARCHIVO, new TypeToken<List<Impuesto>>() {}.getType());
         if (impuestos.isEmpty()) {
-            // Retenciones por defecto
-            impuestos.add(new Impuesto(TipoImpuesto.IVA, 21.0));
-            impuestos.add(new Impuesto(TipoImpuesto.GANANCIAS, 6.0));
-            impuestos.add(new Impuesto(TipoImpuesto.IIBB, 3.0));
+            // Retenciones por defecto (con Mínimo No Imponible para Ganancias e IIBB)
+            impuestos.add(new Impuesto(TipoImpuesto.IVA, 21.0, 0.0));
+            impuestos.add(new Impuesto(TipoImpuesto.GANANCIAS, 6.0, 90000.0));
+            impuestos.add(new Impuesto(TipoImpuesto.IIBB, 3.0, 50000.0));
         }
     }
 

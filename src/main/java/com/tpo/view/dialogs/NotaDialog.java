@@ -3,6 +3,7 @@ package com.tpo.view.dialogs;
 import com.tpo.controller.NotaController;
 import com.tpo.model.dto.NotaDTO;
 import com.tpo.model.entities.supplier.Proveedor;
+import com.tpo.view.components.ProveedorSelector;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -30,7 +31,7 @@ public class NotaDialog extends JDialog {
 
     private final JComboBox<String> comboTipo;
     private final JTextField txtNumero;
-    private final JTextField txtProveedor;
+    private final ProveedorSelector comboProveedor;
     private final JTextField txtFecha;
     private final JTextField txtImporte;
 
@@ -57,14 +58,14 @@ public class NotaDialog extends JDialog {
 
         comboTipo = new JComboBox<>(new String[]{NotaDTO.CREDITO, NotaDTO.DEBITO});
         txtNumero = new JTextField(20);
-        txtProveedor = new JTextField(20);
+        comboProveedor = new ProveedorSelector();
         txtFecha = new JTextField(20);
         txtImporte = new JTextField(20);
 
         if (existing != null) {
             comboTipo.setSelectedItem(existing.getTipo());
             txtNumero.setText(String.valueOf(existing.getNumero()));
-            if (existing.getProveedor() != null) txtProveedor.setText(existing.getProveedor().getRazonSocial());
+            if (existing.getProveedor() != null) comboProveedor.seleccionarPorRazonSocial(existing.getProveedor().getRazonSocial());
             if (existing.getFechaEmision() != null) {
                 txtFecha.setText(new SimpleDateFormat("dd/MM/yyyy").format(existing.getFechaEmision()));
             }
@@ -78,7 +79,7 @@ public class NotaDialog extends JDialog {
         gbc.insets = new Insets(5, 5, 5, 5);
 
         String[] labels = {"Tipo:", "Número:", "Proveedor:", "Fecha (dd/MM/yyyy):", "Importe:"};
-        JComponent[] fields = {comboTipo, txtNumero, txtProveedor, txtFecha, txtImporte};
+        JComponent[] fields = {comboTipo, txtNumero, comboProveedor, txtFecha, txtImporte};
 
         for (int i = 0; i < labels.length; i++) {
             gbc.gridx = 0; gbc.gridy = i; gbc.weightx = 0.45;
@@ -100,9 +101,13 @@ public class NotaDialog extends JDialog {
     }
 
     private void guardar() {
-        String proveedorStr = txtProveedor.getText().trim();
-        if (proveedorStr.isEmpty()) {
-            error("El proveedor es obligatorio.");
+        if (!comboProveedor.hayProveedores()) {
+            error("No hay proveedores cargados. Cargá un proveedor primero.");
+            return;
+        }
+        Proveedor proveedor = comboProveedor.getSeleccionado();
+        if (proveedor == null) {
+            error("Seleccioná un proveedor.");
             return;
         }
         int numero;
@@ -124,8 +129,6 @@ public class NotaDialog extends JDialog {
             return;
         }
 
-        Proveedor proveedor = new Proveedor();
-        proveedor.setRazonSocial(proveedorStr);
         String tipo = (String) comboTipo.getSelectedItem();
 
         if (editIndex >= 0) {
