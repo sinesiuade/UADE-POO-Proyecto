@@ -49,7 +49,17 @@ public class OrdenDeCompraController {
 
     /** Reemplaza una OC existente recalculando su estado. */
     public OrdenDeCompraDTO editarOrdenDeCompra(int index, OrdenDeCompra oc) {
+        EstadoOrdenDeCompra estadoPrevio = ordenes.get(index).getEstado();
         OrdenDeCompraDTO dto = validarYMapear(oc);
+
+        // Solo un supervisor puede pasar de Pendiente de Aprobación a Emitida.
+        // Un operador que edita una OC pendiente no puede emitirla por esta vía.
+        if (estadoPrevio == EstadoOrdenDeCompra.PENDIENTE_APROBACION
+                && dto.getEstado() == EstadoOrdenDeCompra.EMITIDA
+                && !SesionController.getInstance().esSupervisor()) {
+            dto.setEstado(EstadoOrdenDeCompra.PENDIENTE_APROBACION);
+        }
+
         ordenes.set(index, dto);
         persistir();
         return dto;
