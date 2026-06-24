@@ -110,9 +110,25 @@ public class FacturaController {
             }
         }
 
-        return new FacturaDTO(
+        FacturaDTO dto = new FacturaDTO(
                 factura.getProveedor(), factura.getFechaEmision(),
                 factura.getTotalBruto(), factura.getDetalleItems().size(), factura.isObservada(), 0.0);
+        dto.setIvaPorAlicuota(calcularIvaPorAlicuota(factura));
+        return dto;
+    }
+
+    /** Acumula neto gravado e IVA por alícuota a partir de los detalles de la factura. */
+    private List<FacturaDTO.IvaAlicuota> calcularIvaPorAlicuota(Factura factura) {
+        java.util.Map<Double, double[]> acc = new java.util.LinkedHashMap<>(); // alícuota -> [neto, iva]
+        for (DetalleItemDocComercial d : factura.getDetalleItems()) {
+            double neto = d.getCantidad() * d.getPrecio();
+            double[] v = acc.computeIfAbsent(d.getIva(), k -> new double[2]);
+            v[0] += neto;
+            v[1] += neto * d.getIva() / 100.0;
+        }
+        List<FacturaDTO.IvaAlicuota> desglose = new ArrayList<>();
+        acc.forEach((alicuota, v) -> desglose.add(new FacturaDTO.IvaAlicuota(alicuota, v[0], v[1])));
+        return desglose;
     }
 
     /** Facturas del proveedor con saldo pendiente (para imputar pagos por documento). */
@@ -180,12 +196,25 @@ public class FacturaController {
         r.cantidadDetalles = dto.getCantidadDetalles();
         r.observada = dto.isObservada();
         r.montoPagado = dto.getMontoPagado();
+        for (FacturaDTO.IvaAlicuota ia : dto.getIvaPorAlicuota()) {
+            FacturaRecord.IvaLinea linea = new FacturaRecord.IvaLinea();
+            linea.alicuota = ia.getAlicuota();
+            linea.neto = ia.getNeto();
+            linea.iva = ia.getIva();
+            r.ivaPorAlicuota.add(linea);
+        }
         return r;
     }
 
     private FacturaDTO fromRecord(FacturaRecord r) {
         Proveedor p = new Proveedor();
         p.setRazonSocial(r.proveedor);
-        return new FacturaDTO(p, new Date(r.fecha), r.importeTotal, r.cantidadDetalles, r.observada, r.montoPagado);
+        FacturaDTO dto = new FacturaDTO(p, new Date(r.fecha), r.importeTotal, r.cantidadDetalles, r.observada, r.montoPagado);
+        if (r.ivaPorAlicuota != null) {
+            for (FacturaRecord.IvaLinea linea : r.ivaPorAlicuota) {
+                dto.getIvaPorAlicuota().add(new FacturaDTO.IvaAlicuota(linea.alicuota, linea.neto, linea.iva));
+            }
+        }
+        return dto;
     }
 }

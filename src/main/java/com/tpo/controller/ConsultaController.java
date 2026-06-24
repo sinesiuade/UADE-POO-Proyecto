@@ -45,6 +45,7 @@ public class ConsultaController {
         // 5. Reportes Fiscales
         reportes.put("Total retenido por impuesto", this::totalRetenidoPorImpuesto);
         reportes.put("Total retenido por impuesto y período", this::totalRetenidoPorImpuestoYPeriodo);
+        reportes.put("Libro IVA Compras", this::libroIvaCompras);
     }
 
     private static ConsultaController INSTANCE;
@@ -435,6 +436,40 @@ public class ConsultaController {
         }
         acc.forEach((per, porImpuesto) ->
                 porImpuesto.forEach((tipo, monto) -> r.agregarFila(per, tipo, String.format("%.2f", monto))));
+        return r;
+    }
+
+    /** Libro IVA Compras: una fila por (factura, alícuota) con CUIT, neto, IVA y total. */
+    private ReporteDTO libroIvaCompras() {
+        ReporteDTO r = new ReporteDTO("Libro IVA Compras",
+                new String[]{"Fecha", "CUIT", "Proveedor", "Tipo", "Alícuota IVA", "Neto Gravado", "IVA", "Total"});
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy");
+
+        List<FacturaDTO> facturas = new ArrayList<>(FacturaController.getInstance().getFacturas());
+        facturas.sort(Comparator.comparing(FacturaDTO::getFechaEmision,
+                Comparator.nullsLast(Comparator.naturalOrder())));
+
+        for (FacturaDTO f : facturas) {
+            String razon = nombre(f.getProveedor());
+            Proveedor real = ProveedorController.getInstance().getProveedorPorRazonSocial(razon);
+            String cuit = real != null && real.getCuit() > 0 ? String.valueOf(real.getCuit()) : "-";
+            String fecha = f.getFechaEmision() != null ? sdf.format(f.getFechaEmision()) : "";
+
+            if (f.getIvaPorAlicuota() == null || f.getIvaPorAlicuota().isEmpty()) {
+                // Sin desglose disponible: muestra el total como una sola fila informativa.
+                r.agregarFila(fecha, cuit, razon, "Factura", "-",
+                        String.format("%.2f", f.getImporteTotal()), "0.00",
+                        String.format("%.2f", f.getImporteTotal()));
+                continue;
+            }
+            for (FacturaDTO.IvaAlicuota ia : f.getIvaPorAlicuota()) {
+                r.agregarFila(fecha, cuit, razon, "Factura",
+                        String.format("%.1f%%", ia.getAlicuota()),
+                        String.format("%.2f", ia.getNeto()),
+                        String.format("%.2f", ia.getIva()),
+                        String.format("%.2f", ia.getNeto() + ia.getIva()));
+            }
+        }
         return r;
     }
 }

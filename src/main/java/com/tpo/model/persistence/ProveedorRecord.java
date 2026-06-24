@@ -17,4 +17,6 @@ public class ProveedorRecord {
     public int limiteDeudaAutorizado;
     public double deudaActual;
     public List<String> rubros = new ArrayList<>();
+    public List<ItemProveedorRecord> itemsProvistos = new ArrayList<>();
+    public List<CertificadoRecord> certificados = new ArrayList<>();
 }

@@ -46,6 +46,16 @@ public class ItemController {
         return Collections.unmodifiableList(items);
     }
 
+    /** Devuelve el Item del catálogo con ese código, o null si no existe. */
+    public Item getItemPorCodigo(int codigo) {
+        for (Item item : items) {
+            if (item.getCodigo() == codigo) {
+                return item;
+            }
+        }
+        return null;
+    }
+
     public void agregarItem(Item item) {
         items.add(item);
         persistir();
