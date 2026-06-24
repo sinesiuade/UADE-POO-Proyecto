@@ -1,0 +1,48 @@
+[
+  {
+    "tipo": "Producto",
+    "codigo": 1,
+    "descripcion": "Guantes de látex",
+    "rubro": "Insumos descartables y estériles",
+    "unidadMedida": "Caja x100",
+    "precioUnitario": 5000.0,
+    "porcentajeIva": 21.0,
+    "lote": "L-001",
+    "vencimiento": 1782259506603,
+    "stock": "120"
+  },
+  {
+    "tipo": "Producto",
+    "codigo": 2,
+    "descripcion": "Alcohol en gel 250ml",
+    "rubro": "Insumos descartables y estériles",
+    "unidadMedida": "Unidad",
+    "precioUnitario": 1200.0,
+    "porcentajeIva": 21.0,
+    "lote": "L-002",
+    "vencimiento": 1782259506603,
+    "stock": "300"
+  },
+  {
+    "tipo": "Servicio",
+    "codigo": 3,
+    "descripcion": "Resonancia magnética",
+    "rubro": "Estudios de diagnóstico por imágenes",
+    "unidadMedida": "Estudio",
+    "precioUnitario": 80000.0,
+    "porcentajeIva": 10.5,
+    "vencimiento": 0,
+    "tipoDePrestacion": "Diagnóstico por imágenes"
+  },
+  {
+    "tipo": "Servicio",
+    "codigo": 4,
+    "descripcion": "Servicio de limpieza mensual",
+    "rubro": "Limpieza y desinfección (general y técnica)",
+    "unidadMedida": "Mes",
+    "precioUnitario": 150000.0,
+    "porcentajeIva": 21.0,
+    "vencimiento": 0,
+    "tipoDePrestacion": "Limpieza y desinfección"
+  }
+]
