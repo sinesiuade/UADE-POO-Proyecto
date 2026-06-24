@@ -2,8 +2,14 @@ package com.tpo.controller;
 
 import com.google.gson.reflect.TypeToken;
 import com.tpo.model.Enums.CondicionImpositiva;
+import com.tpo.model.entities.catalog.Item;
+import com.tpo.model.entities.catalog.ItemProveedor;
 import com.tpo.model.entities.catalog.Rubro;
 import com.tpo.model.entities.supplier.Proveedor;
+import com.tpo.model.entities.tax.CertificadoDeExclusion;
+import com.tpo.model.entities.tax.TipoImpuesto;
+import com.tpo.model.persistence.CertificadoRecord;
+import com.tpo.model.persistence.ItemProveedorRecord;
 import com.tpo.model.persistence.ProveedorRecord;
 import com.tpo.util.JsonStore;
 
@@ -49,6 +55,19 @@ public class ProveedorController {
         return Collections.unmodifiableList(proveedores);
     }
 
+    /** Devuelve el proveedor con esa razón social, o null si no existe. */
+    public Proveedor getProveedorPorRazonSocial(String razonSocial) {
+        if (razonSocial == null) {
+            return null;
+        }
+        for (Proveedor p : proveedores) {
+            if (razonSocial.equals(p.getRazonSocial())) {
+                return p;
+            }
+        }
+        return null;
+    }
+
     /** Indica si ya hay un proveedor con ese CUIT (o razón social si no hay CUIT), ignorando una posición. */
     public boolean existeProveedor(long cuit, String razonSocial, int ignorarIndex) {
         for (int i = 0; i < proveedores.size(); i++) {
@@ -92,6 +111,22 @@ public class ProveedorController {
                 r.rubros.add(rubro.getNombre());
             }
         }
+        for (ItemProveedor ip : p.getItemsProvistos()) {
+            if (ip.getItemBase() != null) {
+                ItemProveedorRecord ipr = new ItemProveedorRecord();
+                ipr.codigoItem = ip.getItemBase().getCodigo();
+                ipr.precio = ip.getPrecio();
+                r.itemsProvistos.add(ipr);
+            }
+        }
+        for (CertificadoDeExclusion c : p.getCertificadosDeExclusion()) {
+            CertificadoRecord cr = new CertificadoRecord();
+            cr.tipoImpuesto = c.getTipoImpuesto() != null ? c.getTipoImpuesto().name() : null;
+            cr.fechaDesde = c.getFechaDesde() != null ? c.getFechaDesde().getTime() : 0;
+            cr.fechaHasta = c.getFechaHasta() != null ? c.getFechaHasta().getTime() : 0;
+            cr.numeroCertificado = c.getNumeroCertificado();
+            r.certificados.add(cr);
+        }
         return r;
     }
 
@@ -115,6 +150,32 @@ public class ProveedorController {
         if (r.rubros != null) {
             for (String nombre : r.rubros) {
                 p.getRubros().add(new Rubro(nombre));
+            }
+        }
+        if (r.itemsProvistos != null) {
+            for (ItemProveedorRecord ipr : r.itemsProvistos) {
+                // Resolvemos la misma instancia del catálogo para que proveeItem() (compara por
+                // referencia) funcione tras recargar.
+                Item item = ItemController.getInstance().getItemPorCodigo(ipr.codigoItem);
+                if (item != null) {
+                    p.getItemsProvistos().add(new ItemProveedor(ipr.precio, item, p));
+                }
+            }
+        }
+        if (r.certificados != null) {
+            for (CertificadoRecord cr : r.certificados) {
+                CertificadoDeExclusion c = new CertificadoDeExclusion();
+                if (cr.tipoImpuesto != null) {
+                    c.setTipoImpuesto(TipoImpuesto.valueOf(cr.tipoImpuesto));
+                }
+                if (cr.fechaDesde > 0) {
+                    c.setFechaDesde(new Date(cr.fechaDesde));
+                }
+                if (cr.fechaHasta > 0) {
+                    c.setFechaHasta(new Date(cr.fechaHasta));
+                }
+                c.setNumeroCertificado(cr.numeroCertificado);
+                p.getCertificadosDeExclusion().add(c);
             }
         }
         return p;
